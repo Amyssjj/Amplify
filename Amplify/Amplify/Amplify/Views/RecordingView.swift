@@ -25,9 +25,10 @@ struct RecordingView: View {
                 if let photo = appState.currentPhoto {
                     Image(uiImage: photo.image)
                         .resizable()
-                        .aspectRatio(contentMode: .fit)  // Maintain natural proportions
-                        .frame(width: geometry.size.width, height: geometry.size.height)
+                        .aspectRatio(contentMode: .fill)  // Fill the space completely
+                        .frame(width: geometry.size.width, height: geometry.size.height * 0.6) // Scale up in top 60%
                         .clipped()
+                        .position(x: geometry.size.width / 2, y: geometry.size.height * 0.25) // Position in top half
                         .ignoresSafeArea(.all)  // True immersive - cover status bar
                         .onAppear {
                             print("🖼️ DEBUG: RecordingView rendering photo successfully")
