@@ -191,19 +191,13 @@ struct RecordingView: View {
                     .foregroundColor(.primary)
             }
             
-            // Large stop button matching design exactly
+            // Large stop button - RED during recording like React design
             Button(action: stopRecording) {
                 ZStack {
                     Circle()
-                        .fill(
-                            LinearGradient(
-                                gradient: Gradient(colors: [Color.blue, Color.purple]),
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
+                        .fill(Color.red)
                         .frame(width: 90, height: 90)
-                        .shadow(color: .blue.opacity(0.3), radius: 15, x: 0, y: 8)
+                        .shadow(color: .red.opacity(0.4), radius: 15, x: 0, y: 8)
                     
                     RoundedRectangle(cornerRadius: 6)
                         .fill(Color.white)
