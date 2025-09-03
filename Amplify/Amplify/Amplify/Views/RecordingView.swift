@@ -20,6 +20,14 @@ struct RecordingView: View {
     
     var body: some View {
         GeometryReader { geometry in
+            // DEBUG: Device Detection
+            let deviceModel = detectiPhoneModel(width: geometry.size.width, height: geometry.size.height)
+            let _ = print("📱 DEVICE DETECTION DEBUG:")
+            let _ = print("   Screen Size: \(geometry.size.width) x \(geometry.size.height)")
+            let _ = print("   Detected Device: \(deviceModel)")
+            let _ = print("   Scale Factor: \(UIScreen.main.scale)")
+            let _ = print("   Native Resolution: \(geometry.size.width * UIScreen.main.scale) x \(geometry.size.height * UIScreen.main.scale)")
+            
             // DEBUG: Print geometry values
             let _ = print("📐 GEOMETRY DEBUG:")
             let _ = print("   Total Height: \(geometry.size.height)")
@@ -65,6 +73,26 @@ struct RecordingView: View {
         }
         .onDisappear {
             cleanupRecording()
+        }
+    }
+    
+    // MARK: - Device Detection Helper
+    
+    private func detectiPhoneModel(width: CGFloat, height: CGFloat) -> String {
+        let dimensions = "\(Int(width))x\(Int(height))"
+        
+        switch dimensions {
+        case "390x844": return "iPhone 14, iPhone 15"
+        case "393x852": return "iPhone 14 Pro, iPhone 15 Pro" 
+        case "402x874": return "iPhone 16 Pro"
+        case "430x932": return "iPhone 14 Plus, iPhone 15 Plus"
+        case "440x956": return "iPhone 16 Pro Max"
+        case "375x812": return "iPhone 13 mini"
+        case "428x926": return "iPhone 14 Pro Max, iPhone 15 Pro Max"
+        case "375x667": return "iPhone SE (2nd/3rd gen)"
+        case "414x896": return "iPhone 11, iPhone XR"
+        case "390x693": return "iPhone 16, iPhone 16 Plus"
+        default: return "Unknown iPhone Model (\(dimensions))"
         }
     }
     
