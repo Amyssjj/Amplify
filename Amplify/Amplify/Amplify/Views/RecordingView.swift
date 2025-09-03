@@ -47,6 +47,7 @@ struct RecordingView: View {
                 bottomSheet(geometry: geometry)
                     .ignoresSafeArea(.container, edges: .bottom)
             }
+            .background(Color(.systemBackground)) // White background fills gaps behind clipShape
         }
         .navigationBarHidden(true)
         .onAppear {
