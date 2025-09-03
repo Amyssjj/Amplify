@@ -127,18 +127,17 @@ struct RecordingView: View {
     
     private func bottomSheet(geometry: GeometryProxy) -> some View {
         VStack(spacing: 0) {
-            // White rounded sheet - constrained to exactly half screen height
-            VStack(spacing: 16) {
+            // White rounded sheet - exactly half screen height
+            VStack(spacing: 0) {
                 // "Listening..." header
-                VStack(spacing: 16) {
-                    Text("Listening...")
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.primary)
-                }
-                .padding(.top, 16)
+                Text("Listening...")
+                    .font(.title2)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.primary)
+                    .padding(.top, 24)
+                    .padding(.bottom, 16)
                 
-                // Transcript area - no background, directly on white
+                // Transcript area - fills most of the bottom sheet space
                 ScrollView {
                     ScrollViewReader { proxy in
                         VStack(alignment: .leading, spacing: 12) {
@@ -147,12 +146,13 @@ struct RecordingView: View {
                                     .font(.body)
                                     .foregroundColor(.secondary)
                                     .italic()
+                                    .frame(maxWidth: .infinity, alignment: .leading)
                             } else {
                                 // Text with simple inline cursor - works for multiline
                                 Text(currentTranscript + (pulseAnimation ? "│" : "║"))
                                     .font(.body)
                                     .foregroundColor(.primary)
-                                    .lineSpacing(4)
+                                    .lineSpacing(6)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .id("transcript")
                                     .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: pulseAnimation)
@@ -167,14 +167,12 @@ struct RecordingView: View {
                         }
                     }
                 }
-                .frame(maxHeight: .infinity) // Flexible height within bottom sheet constraint
-                .padding(.horizontal, 0)
+                .frame(maxWidth: .infinity)
+                .layoutPriority(1) // Give transcription area priority for space
                 
-                Spacer(minLength: 20)
-                
-                // Recording button with timer above (matching RecordButton.tsx)
-                VStack(spacing: 16) {
-                    // Timer in glass pill above button - matching React design
+                // Bottom controls section
+                VStack(spacing: 12) {
+                    // Timer in glass pill
                     Text(formatDuration(appState.currentRecordingDuration))
                         .font(.headline)
                         .fontWeight(.medium)
@@ -195,42 +193,42 @@ struct RecordingView: View {
                         )
                         .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 4)
                     
-                    // Animated Stop button
-                Button(action: stopRecording) {
-                    ZStack {
-                        // Outer pulsing ring
-                        Circle()
-                            .fill(Color.red.opacity(0.3))
-                            .frame(width: 120, height: 120)
-                            .scaleEffect(pulseAnimation ? 1.2 : 1.0)
-                            .opacity(pulseAnimation ? 0.0 : 0.3)
-                            .animation(
-                                .easeInOut(duration: 1.5).repeatForever(autoreverses: false),
-                                value: pulseAnimation
-                            )
-                        
-                        // Main button
-                        Circle()
-                            .fill(Color.red)
-                            .frame(width: 80, height: 80)
-                            .shadow(color: .red.opacity(0.4), radius: 15, x: 0, y: 8)
-                        
-                        // Stop icon
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(Color.white)
-                            .frame(width: 16, height: 16)
+                    // Recording stop button
+                    Button(action: stopRecording) {
+                        ZStack {
+                            // Outer pulsing ring
+                            Circle()
+                                .fill(Color.red.opacity(0.3))
+                                .frame(width: 100, height: 100)
+                                .scaleEffect(pulseAnimation ? 1.2 : 1.0)
+                                .opacity(pulseAnimation ? 0.0 : 0.3)
+                                .animation(
+                                    .easeInOut(duration: 1.5).repeatForever(autoreverses: false),
+                                    value: pulseAnimation
+                                )
+                            
+                            // Main button
+                            Circle()
+                                .fill(Color.red)
+                                .frame(width: 70, height: 70)
+                                .shadow(color: .red.opacity(0.4), radius: 15, x: 0, y: 8)
+                            
+                            // Stop icon
+                            RoundedRectangle(cornerRadius: 3)
+                                .fill(Color.white)
+                                .frame(width: 14, height: 14)
+                        }
                     }
+                    .scaleEffect(pulseAnimation ? 1.05 : 1.0)
+                    .animation(
+                        .easeInOut(duration: 1.0).repeatForever(autoreverses: true),
+                        value: pulseAnimation
+                    )
+                    .accessibilityIdentifier("StopRecordingButton")
+                    .accessibilityLabel("Stop recording")
                 }
-                .scaleEffect(pulseAnimation ? 1.05 : 1.0)
-                .animation(
-                    .easeInOut(duration: 1.0).repeatForever(autoreverses: true),
-                    value: pulseAnimation
-                )
-                .accessibilityIdentifier("StopRecordingButton")
-                .accessibilityLabel("Stop recording")
-                }
-                
-                Spacer(minLength: 20)
+                .padding(.vertical, 20)
+                .padding(.bottom, max(0, geometry.safeAreaInsets.bottom))
             }
             .frame(height: geometry.size.height / 2) // Exactly half screen height
             .background(
