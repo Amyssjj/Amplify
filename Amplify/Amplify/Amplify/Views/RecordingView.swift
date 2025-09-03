@@ -148,24 +148,27 @@ struct RecordingView: View {
                                     .foregroundColor(.secondary)
                                     .italic()
                             } else {
-                                HStack(alignment: .top) {
-                                    Text(currentTranscript)
-                                        .font(.body)
-                                        .foregroundColor(.primary)
-                                        .lineSpacing(4)
-                                        .id("transcript")
-                                    
-                                    // Blinking cursor
-                                    Rectangle()
-                                        .fill(Color.blue)
-                                        .frame(width: 2, height: 20)
-                                        .opacity(pulseAnimation ? 1.0 : 0.3)
-                                        .animation(
-                                            .easeInOut(duration: 0.8).repeatForever(autoreverses: true),
-                                            value: pulseAnimation
-                                        )
-                                    
-                                    Spacer()
+                                VStack(alignment: .leading, spacing: 0) {
+                                    HStack(alignment: .top, spacing: 2) {
+                                        Text(currentTranscript)
+                                            .font(.body)
+                                            .foregroundColor(.primary)
+                                            .lineSpacing(4)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                        
+                                        // Blinking cursor - positioned at text end
+                                        Rectangle()
+                                            .fill(Color.blue)
+                                            .frame(width: 2, height: 20)
+                                            .opacity(pulseAnimation ? 1.0 : 0.3)
+                                            .animation(
+                                                .easeInOut(duration: 0.8).repeatForever(autoreverses: true),
+                                                value: pulseAnimation
+                                            )
+                                        
+                                        Spacer()
+                                    }
+                                    .id("transcript")
                                 }
                             }
                         }
@@ -183,12 +186,12 @@ struct RecordingView: View {
                 
                 Spacer(minLength: 20)
                 
-                // Timer close to button - smaller like original
+                // Timer close to button - small font matching design
                 Text(formatDuration(appState.currentRecordingDuration))
-                    .font(.title)
-                    .fontWeight(.medium)
+                    .font(.title2)
+                    .fontWeight(.semibold)
                     .foregroundColor(.primary)
-                    .padding(.bottom, 12)
+                    .padding(.bottom, 8)
                 
                 // Animated Stop button
                 Button(action: stopRecording) {
