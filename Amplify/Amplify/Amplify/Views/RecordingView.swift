@@ -41,14 +41,16 @@ struct RecordingView: View {
                     }
                 }
                 .frame(height: geometry.size.height * 0.5)
+                .background(Color.blue.opacity(0.3))  // DEBUG: Photo section background
                 .ignoresSafeArea(.container, edges: .top)
                 
                 // Bottom Half - White Sheet
                 bottomSheet(geometry: geometry)
                     .ignoresSafeArea(.container, edges: .bottom)
             }
-            .background(Color(.systemBackground)) // White background fills gaps behind clipShape
+            .background(Color.red.opacity(0.5))  // DEBUG: Main VStack container background
         }
+        .background(Color.yellow.opacity(0.3))  // DEBUG: GeometryReader background
         .navigationBarHidden(true)
         .onAppear {
             setupRecording()
@@ -167,6 +169,7 @@ struct RecordingView: View {
                 }
                 .frame(height: headerHeight)
                 .frame(maxWidth: .infinity)
+                .background(Color.purple.opacity(0.4))  // DEBUG: Header section background
                 // No top padding - header should be flush with photo edge
                 
                 // Transcript area with 8-line design, text starts in middle
@@ -274,9 +277,9 @@ struct RecordingView: View {
         .frame(height: bottomSheetHeight)
         .frame(maxWidth: .infinity)
         .background(
-            // Clean single white background
+            // DEBUG: Bottom sheet background
             Rectangle()
-                .fill(Color(.systemBackground))
+                .fill(Color.green.opacity(0.4))
         )
         .clipShape(
             // Only round top corners, extend straight to bottom edge
