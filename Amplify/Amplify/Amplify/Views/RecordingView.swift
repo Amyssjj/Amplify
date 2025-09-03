@@ -39,7 +39,7 @@ struct RecordingView: View {
                 
                 // Photo Overlay Controls
                 VStack {
-                    photoOverlayControls
+                    photoOverlayControls(geometry: geometry)
                     Spacer()
                 }
                 
@@ -61,7 +61,7 @@ struct RecordingView: View {
     
     // MARK: - Photo Overlay Controls
     
-    private var photoOverlayControls: some View {
+    private func photoOverlayControls(geometry: GeometryProxy) -> some View {
         HStack {
             // Back button
             Button {
