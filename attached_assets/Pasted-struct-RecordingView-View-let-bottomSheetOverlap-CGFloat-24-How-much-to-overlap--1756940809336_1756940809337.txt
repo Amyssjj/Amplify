@@ -1,0 +1,52 @@
+struct RecordingView: View {
+    let bottomSheetOverlap: CGFloat = 24 // How much to overlap
+    
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack(alignment: .top) {
+                // Photo in top half
+                Image(uiImage: appState.currentPhoto?.image ?? UIImage())
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: geometry.size.width, height: geometry.size.height * 0.5)
+                    .clipped()
+                    .overlay(
+                        // Dark gradient at bottom for better contrast
+                        LinearGradient(
+                            colors: [.clear, .black.opacity(0.2)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                        .frame(height: 100)
+                        .offset(y: (geometry.size.height * 0.5) - 100)
+                    )
+                
+                // Photo controls
+                VStack {
+                    photoOverlayControls(geometry: geometry)
+                    Spacer()
+                }
+                .frame(height: geometry.size.height * 0.5)
+                
+                // Bottom sheet with overlap
+                bottomSheetContent()
+                    .frame(width: geometry.size.width, height: (geometry.size.height * 0.5) + bottomSheetOverlap)
+                    .background(
+                        Color(.systemBackground)
+                            .clipShape(
+                                UnevenRoundedRectangle(
+                                    topLeadingRadius: 24,
+                                    bottomLeadingRadius: 0,
+                                    bottomTrailingRadius: 0,
+                                    topTrailingRadius: 24
+                                )
+                            )
+                            .shadow(color: .black.opacity(0.15), radius: 20, x: 0, y: -5)
+                    )
+                    .offset(y: (geometry.size.height * 0.5) - bottomSheetOverlap)
+            }
+            .background(Color.black) // Fill any gaps with black
+        }
+        .ignoresSafeArea()
+    }
+}
