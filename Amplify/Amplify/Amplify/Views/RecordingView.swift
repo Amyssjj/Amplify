@@ -170,7 +170,7 @@ struct RecordingView: View {
                 .frame(minHeight: max(50, min(100, geometry.size.height * 0.2)), maxHeight: max(100, min(150, geometry.size.height * 0.3)))
                 .padding(.horizontal, 0)
                 
-                Spacer(minLength: 20)
+                Spacer(minLength: 60)
                 
                 // Recording button with timer above (matching RecordButton.tsx)
                 VStack(spacing: 16) {
@@ -228,14 +228,9 @@ struct RecordingView: View {
                 )
                 .accessibilityIdentifier("StopRecordingButton")
                 .accessibilityLabel("Stop recording")
-                
-                    Text("Tap to stop recording")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .padding(.top, 8)
                 }
                 
-                Spacer(minLength: 32)
+                Spacer(minLength: 80)
             }
             .background(
                 RoundedRectangle(cornerRadius: 24)
