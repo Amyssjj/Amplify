@@ -28,8 +28,8 @@ struct RecordingView: View {
                             .resizable()
                             .aspectRatio(contentMode: .fill)
                             .frame(
-                                width: max(1, geometry.size.width),
-                                height: max(100, geometry.size.height * 0.5)
+                                width: geometry.size.width,
+                                height: geometry.size.height * 0.5
                             )
                             .clipped()
                     }
@@ -40,7 +40,7 @@ struct RecordingView: View {
                         Spacer()
                     }
                 }
-                .frame(height: max(100, geometry.size.height * 0.5))
+                .frame(height: geometry.size.height * 0.5)
                 .ignoresSafeArea(.container, edges: .top)
                 
                 // Bottom Half - White Sheet
