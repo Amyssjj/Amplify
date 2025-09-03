@@ -127,8 +127,8 @@ struct RecordingView: View {
     
     private func bottomSheet(geometry: GeometryProxy) -> some View {
         VStack(spacing: 0) {
-            // White rounded sheet
-            VStack(spacing: 24) {
+            // White rounded sheet - constrained to exactly half screen height
+            VStack(spacing: 16) {
                 // "Listening..." header
                 VStack(spacing: 16) {
                     Text("Listening...")
@@ -136,7 +136,7 @@ struct RecordingView: View {
                         .fontWeight(.semibold)
                         .foregroundColor(.primary)
                 }
-                .padding(.top, 24)
+                .padding(.top, 16)
                 
                 // Transcript area - no background, directly on white
                 ScrollView {
@@ -167,10 +167,10 @@ struct RecordingView: View {
                         }
                     }
                 }
-                .frame(height: 230) // Fixed height for exactly 10 lines of text
+                .frame(maxHeight: .infinity) // Flexible height within bottom sheet constraint
                 .padding(.horizontal, 0)
                 
-                Spacer(minLength: 60)
+                Spacer(minLength: 20)
                 
                 // Recording button with timer above (matching RecordButton.tsx)
                 VStack(spacing: 16) {
@@ -230,8 +230,9 @@ struct RecordingView: View {
                 .accessibilityLabel("Stop recording")
                 }
                 
-                Spacer(minLength: 80)
+                Spacer(minLength: 20)
             }
+            .frame(height: geometry.size.height / 2) // Exactly half screen height
             .background(
                 RoundedRectangle(cornerRadius: 24)
                     .fill(Color(.systemBackground))
