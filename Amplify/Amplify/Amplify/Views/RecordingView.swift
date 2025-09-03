@@ -19,41 +19,38 @@ struct RecordingView: View {
     private let maxRecordingDuration: TimeInterval = 60.0
     
     var body: some View {
-        GeometryReader { geometry in
-            VStack(spacing: 0) {
-                // Top Half - Photo Section
-                ZStack {
+        ZStack {
+            // Single unified white background
+            Color(.systemBackground)
+                .ignoresSafeArea(.all)
+            
+            GeometryReader { geometry in
+                ZStack(alignment: .top) {
+                    // Full-screen photo background
                     if let photo = appState.currentPhoto {
                         Image(uiImage: photo.image)
                             .resizable()
                             .aspectRatio(contentMode: .fill)
-                            .frame(
-                                width: geometry.size.width,
-                                height: geometry.size.height * 0.5
-                            )
+                            .frame(width: geometry.size.width, height: geometry.size.height)
                             .clipped()
                     }
                     
-                    // Photo Overlay Controls
+                    // Photo overlay controls positioned at top
                     VStack {
                         photoOverlayControls(geometry: geometry)
                         Spacer()
                     }
-                }
-                .frame(width: geometry.size.width, height: geometry.size.height * 0.5)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)  // Fill entire allocated space
-                .background(Color.blue.opacity(0.3))  // DEBUG: Photo section background
-                .clipped()  // Prevent overflow beyond boundaries
-                .ignoresSafeArea(.container, edges: .top)
-                
-                // Bottom Half - White Sheet
-                bottomSheet(geometry: geometry)
-                    .clipped()  // Prevent overflow beyond boundaries
+                    .ignoresSafeArea(.container, edges: .top)
+                    
+                    // Bottom sheet positioned naturally from bottom
+                    VStack {
+                        Spacer(minLength: geometry.size.height * 0.5) // Natural spacing instead of forced split
+                        bottomSheet(geometry: geometry)
+                    }
                     .ignoresSafeArea(.container, edges: .bottom)
+                }
             }
-            .background(Color.red.opacity(0.5))  // DEBUG: Main VStack container background
         }
-        .background(Color.yellow.opacity(0.3))  // DEBUG: GeometryReader background
         .navigationBarHidden(true)
         .onAppear {
             setupRecording()
@@ -152,14 +149,11 @@ struct RecordingView: View {
     // MARK: - Bottom Sheet
     
     private func bottomSheet(geometry: GeometryProxy) -> some View {
-        // Simple 50/50 split - let ignoresSafeArea handle extensions automatically
-        let totalHeight = geometry.size.height
-        let bottomSheetHeight = totalHeight * 0.5
-        
-        
-        let headerHeight: CGFloat = 50 // Header space for "Listening..."
+        // Natural content-based sizing instead of forced calculations
+        let headerHeight: CGFloat = 60 // Header space for "Listening..."
         let controlsHeight: CGFloat = 140 // Timer + button space
-        let transcriptHeight = bottomSheetHeight - headerHeight - controlsHeight
+        let availableHeight = (geometry.size.height * 0.5) - geometry.safeAreaInsets.bottom
+        let transcriptHeight = max(120, availableHeight - headerHeight - controlsHeight)
         
         return VStack(spacing: 0) {
                 // Fixed height header - positioned close to photo bottom
@@ -172,7 +166,7 @@ struct RecordingView: View {
                 }
                 .frame(height: headerHeight)
                 .frame(maxWidth: .infinity)
-                .background(Color.purple.opacity(0.4))  // DEBUG: Header section background
+                // Clean header with no debug background
                 // No top padding - header should be flush with photo edge
                 
                 // Transcript area with 8-line design, text starts in middle
@@ -277,15 +271,12 @@ struct RecordingView: View {
                 .frame(height: controlsHeight)
                 .frame(maxWidth: .infinity)
         }
-        .frame(width: geometry.size.width, height: bottomSheetHeight)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)  // Fill entire allocated space
         .background(
-            // DEBUG: Bottom sheet background
+            // Single clean white background with rounded corners
             Rectangle()
-                .fill(Color.green.opacity(0.4))
+                .fill(Color(.systemBackground))
         )
         .clipShape(
-            // Only round top corners, extend straight to bottom edge
             UnevenRoundedRectangle(
                 topLeadingRadius: 24,
                 bottomLeadingRadius: 0,
