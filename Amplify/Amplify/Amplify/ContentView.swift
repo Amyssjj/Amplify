@@ -102,6 +102,16 @@ struct ContentView: View {
                 insertion: .move(edge: .trailing).combined(with: .opacity),
                 removal: .move(edge: .leading).combined(with: .opacity)
             )
+        case .home:
+            // Smooth return to home with spring physics
+            return AnyTransition.asymmetric(
+                insertion: .scale(scale: 0.95, anchor: .center)
+                    .combined(with: .move(edge: .top))
+                    .combined(with: .opacity),
+                removal: .scale(scale: 1.05, anchor: .center)
+                    .combined(with: .move(edge: .bottom))
+                    .combined(with: .opacity)
+            )
         default:
             return AnyTransition.asymmetric(
                 insertion: .opacity.combined(with: .scale(scale: 0.95, anchor: .center)),

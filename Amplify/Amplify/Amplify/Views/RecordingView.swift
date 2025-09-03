@@ -82,6 +82,8 @@ struct RecordingView: View {
                             .foregroundColor(.primary)
                     )
             }
+            .scaleEffect(backButtonPressed ? 0.9 : 1.0)
+            .animation(.interpolatingSpring(stiffness: 400, damping: 25), value: backButtonPressed)
             .accessibilityIdentifier("CancelRecordingButton")
             
             Spacer()
@@ -364,10 +366,29 @@ struct RecordingView: View {
         }
     }
     
+    @State private var backButtonPressed = false
+    
     private func cancelRecording() {
+        // Immediate visual feedback
+        backButtonPressed = true
+        
+        // Light haptic feedback
+        let lightImpact = UIImpactFeedbackGenerator(style: .light)
+        lightImpact.impactOccurred()
+        
+        // Clean up services
         speechService.stopLiveRecognition()
         audioService.cancelRecording()
-        appState.returnToHome()
+        
+        // Smooth spring transition back to home
+        withAnimation(.interpolatingSpring(stiffness: 300, damping: 30)) {
+            appState.returnToHome()
+        }
+        
+        // Reset button state
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            backButtonPressed = false
+        }
     }
     
     private func cleanupRecording() {
