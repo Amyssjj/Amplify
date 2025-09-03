@@ -28,8 +28,8 @@ struct RecordingView: View {
                             .resizable()
                             .aspectRatio(contentMode: .fill)
                             .frame(
-                                width: geometry.size.width,
-                                height: geometry.size.height * 0.5
+                                width: max(1, geometry.size.width),
+                                height: max(100, geometry.size.height * 0.5)
                             )
                             .clipped()
                     }
@@ -40,12 +40,12 @@ struct RecordingView: View {
                         Spacer()
                     }
                 }
-                .frame(height: geometry.size.height * 0.5)
+                .frame(height: max(100, geometry.size.height * 0.5))
                 .ignoresSafeArea(.top)
                 
                 // Bottom Half - White Sheet
                 bottomSheet(geometry: geometry)
-                    .frame(height: geometry.size.height * 0.5)
+                    .frame(height: max(100, geometry.size.height * 0.5))
             }
         }
         .navigationBarHidden(true)
@@ -176,7 +176,7 @@ struct RecordingView: View {
                         }
                     }
                 }
-                .frame(minHeight: 100, maxHeight: 150)
+                .frame(minHeight: max(50, min(100, geometry.size.height * 0.2)), maxHeight: max(100, min(150, geometry.size.height * 0.3)))
                 .padding(.horizontal, 0)
                 
                 Spacer(minLength: 20)
