@@ -23,18 +23,22 @@ struct RecordingView: View {
             ZStack(alignment: .top) {
                 // Full-screen immersive photo background OR fallback
                 if let photo = appState.currentPhoto {
-                    print("🖼️ DEBUG: RecordingView rendering photo successfully")
                     Image(uiImage: photo.image)
                         .resizable()
                         .aspectRatio(contentMode: .fit)  // Maintain natural proportions
                         .frame(width: geometry.size.width, height: geometry.size.height)
                         .clipped()
                         .ignoresSafeArea(.all)  // True immersive - cover status bar
+                        .onAppear {
+                            print("🖼️ DEBUG: RecordingView rendering photo successfully")
+                        }
                 } else {
-                    print("❌ DEBUG: RecordingView - appState.currentPhoto is NIL")
                     // Fallback background when no photo
                     Color(.systemBackground)
                         .ignoresSafeArea(.all)
+                        .onAppear {
+                            print("❌ DEBUG: RecordingView - appState.currentPhoto is NIL")
+                        }
                     
                     // DEBUG: Show when no photo is available - make it very visible
                     VStack {
