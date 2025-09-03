@@ -15,27 +15,39 @@ struct RecordingView: View {
     @State private var currentTranscript = ""
     @State private var recordingStarted = false
     @State private var pulseAnimation = false
+    @State private var backButtonPressed = false
+    @State private var isTransitioning = false
     
     private let maxRecordingDuration: TimeInterval = 60.0
+    private let bottomSheetOverlap: CGFloat = 24
     
     var body: some View {
         GeometryReader { geometry in
             ZStack(alignment: .top) {
-                // Full-screen immersive photo background OR fallback
+                // Photo in top half with clean positioning
                 if let photo = appState.currentPhoto {
                     Image(uiImage: photo.image)
                         .resizable()
-                        .aspectRatio(contentMode: .fill)  // Fill the space completely
-                        .frame(width: geometry.size.width, height: geometry.size.height * 0.65) // Extend photo further down
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: geometry.size.width, height: geometry.size.height * 0.5)
                         .clipped()
-                        .position(x: geometry.size.width / 2, y: geometry.size.height * 0.2) // Position higher to eliminate gap
-                        .ignoresSafeArea(.all)  // True immersive - cover status bar
+                        .overlay(
+                            // Dark gradient at bottom for better contrast
+                            LinearGradient(
+                                colors: [.clear, .black.opacity(0.2)],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                            .frame(height: 100)
+                            .offset(y: (geometry.size.height * 0.5) - 100)
+                        )
                 } else {
                     // Fallback background when no photo
-                    Color(.systemBackground)
-                        .ignoresSafeArea(.all)
+                    Rectangle()
+                        .fill(Color(.systemBackground))
+                        .frame(height: geometry.size.height * 0.5)
                     
-                    // DEBUG: Show when no photo is available - make it very visible
+                    // DEBUG: Show when no photo is available
                     VStack {
                         Text("❌ DEBUG")
                             .font(.largeTitle)
@@ -43,38 +55,37 @@ struct RecordingView: View {
                         Text("No photo available")
                             .font(.title2)
                             .foregroundColor(.red)
-                        Text("appState.currentPhoto is nil")
-                            .font(.body)
-                            .foregroundColor(.red)
                     }
-                    .padding()
-                    .background(Color.yellow.opacity(0.8))
-                    .cornerRadius(12)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .frame(height: geometry.size.height * 0.5)
                 }
-                    
-                // Photo overlay controls positioned at very top
+                
+                // Photo controls overlay
                 VStack {
                     photoOverlayControls(geometry: geometry)
-                        .padding(.top, 8) // Move controls up near status bar
                     Spacer()
                 }
-                    
-                // Bottom sheet positioned with 15px overlap on photo
-                VStack {
-                    Spacer(minLength: geometry.size.height * 0.5 - 15) // 15px overlap on photo for seamless connection
-                    bottomSheet(geometry: geometry)
-                }
-                .ignoresSafeArea(.container, edges: .bottom)
+                .frame(height: geometry.size.height * 0.5)
+                
+                // Bottom sheet with clean overlap
+                bottomSheetContent()
+                    .frame(width: geometry.size.width, height: (geometry.size.height * 0.5) + bottomSheetOverlap)
+                    .background(
+                        Color(.systemBackground)
+                            .clipShape(
+                                UnevenRoundedRectangle(
+                                    topLeadingRadius: 24,
+                                    bottomLeadingRadius: 0,
+                                    bottomTrailingRadius: 0,
+                                    topTrailingRadius: 24
+                                )
+                            )
+                            .shadow(color: .black.opacity(0.15), radius: 20, x: 0, y: -5)
+                    )
+                    .offset(y: (geometry.size.height * 0.5) - bottomSheetOverlap)
             }
+            .background(Color.black) // Fill any gaps with black
         }
-        // Add white background to bottom sheet to eliminate grey gap
-        .background(
-            Color(.systemBackground)
-                .ignoresSafeArea(.all)
-        )
-        // Add subtle shadow for depth
-        .shadow(color: .black.opacity(0.1), radius: 20, x: 0, y: -5)
+        .ignoresSafeArea()
         .navigationBarHidden(true)
         .onAppear {
             setupRecording()
@@ -84,25 +95,6 @@ struct RecordingView: View {
         }
     }
     
-    // MARK: - Device Detection Helper
-    
-    private func detectiPhoneModel(width: CGFloat, height: CGFloat) -> String {
-        let dimensions = "\(Int(width))x\(Int(height))"
-        
-        switch dimensions {
-        case "390x844": return "iPhone 14, iPhone 15"
-        case "393x852": return "iPhone 14 Pro, iPhone 15 Pro" 
-        case "402x778": return "iPhone 16 Pro"
-        case "430x932": return "iPhone 14 Plus, iPhone 15 Plus"
-        case "440x956": return "iPhone 16 Pro Max"
-        case "375x812": return "iPhone 13 mini"
-        case "428x926": return "iPhone 14 Pro Max, iPhone 15 Pro Max"
-        case "375x667": return "iPhone SE (2nd/3rd gen)"
-        case "414x896": return "iPhone 11, iPhone XR"
-        case "390x693": return "iPhone 16, iPhone 16 Plus"
-        default: return "Unknown iPhone Model (\(dimensions))"
-        }
-    }
     
     // MARK: - Photo Overlay Controls
     
@@ -170,200 +162,113 @@ struct RecordingView: View {
         .padding(.top, max(0, geometry.safeAreaInsets.top + 8))
     }
     
-    // MARK: - Bottom Sheet
+    // MARK: - Bottom Sheet Content
     
-    private func bottomSheet(geometry: GeometryProxy) -> some View {
-        // Natural content-based sizing instead of forced calculations
-        let headerHeight: CGFloat = 60 // Header space for "Listening..."
-        let controlsHeight: CGFloat = 140 // Timer + button space
-        let availableHeight = (geometry.size.height * 0.5) - geometry.safeAreaInsets.bottom
-        let transcriptHeight = max(120, availableHeight - headerHeight - controlsHeight)
-        
-        return VStack(spacing: 0) {
-                // Fixed height header - positioned close to photo bottom
-                VStack {
-                    Text("Listening...")
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.primary)
-                        .multilineTextAlignment(.center)
-                }
-                .frame(height: headerHeight)
+    private func bottomSheetContent() -> some View {
+        VStack(spacing: 0) {
+            // Header - natural sizing with padding
+            Text("Listening...")
+                .font(.title2)
+                .fontWeight(.semibold)
+                .foregroundColor(.primary)
+                .multilineTextAlignment(.center)
+                .padding(.top, 24)
+                .padding(.bottom, 16)
                 .frame(maxWidth: .infinity)
-                // Clean header with no debug background
-                // No top padding - header should be flush with photo edge
-                
-                // Transcript area with 8-line design, text starts in middle
-                ScrollView {
-                    ScrollViewReader { proxy in
-                        VStack(alignment: .leading, spacing: 0) {
-                            // Create 8-line spacing (4 lines above + content + space below)
-                            let lineHeight: CGFloat = 24
-                            let topSpacing = lineHeight * 3.5 // Start near middle of 8 lines
-                            
-                            // Top spacer to position text in middle of 8-line area
-                            Spacer()
-                                .frame(height: topSpacing)
-                            
-                            if currentTranscript.isEmpty {
-                                Text("Start speaking to see your words appear here...")
-                                    .font(.body)
-                                    .foregroundColor(.secondary)
-                                    .italic()
-                                    .lineSpacing(6)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .padding(.horizontal, 24)
-                            } else {
-                                Text(currentTranscript + (pulseAnimation ? "│" : "║"))
-                                    .font(.body)
-                                    .foregroundColor(.primary)
-                                    .lineSpacing(6)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .padding(.horizontal, 24)
-                                    .id("transcript")
-                                    .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: pulseAnimation)
-                            }
-                            
-                            // Bottom spacer to complete 8-line area
-                            Spacer()
-                        }
-                        .frame(minHeight: max(0, transcriptHeight - 40)) // Fill available height
-                        .onChange(of: currentTranscript) {
-                            withAnimation(.easeOut(duration: 0.3)) {
-                                proxy.scrollTo("transcript", anchor: .bottom)
-                            }
-                        }
-                    }
-                }
-                .frame(height: transcriptHeight)
-                
-                // Fixed height bottom controls
-                VStack(spacing: 16) {
-                    // Timer pill
-                    Text(formatDuration(appState.currentRecordingDuration))
-                        .font(.headline)
-                        .fontWeight(.medium)
-                        .foregroundColor(.primary)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
-                        .background(
-                            Capsule()
-                                .fill(.ultraThinMaterial.opacity(0.8))
-                                .background(
-                                    Capsule()
-                                        .fill(Color.white.opacity(0.3))
-                                )
-                                .overlay(
-                                    Capsule()
-                                        .stroke(Color.white.opacity(0.3), lineWidth: 1)
-                                )
-                        )
-                        .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 4)
-                    
-                    // Recording button
-                    Button(action: stopRecording) {
-                        ZStack {
-                            Circle()
-                                .fill(Color.red.opacity(0.3))
-                                .frame(width: 90, height: 90)
-                                .scaleEffect(pulseAnimation ? 1.1 : 1.0)
-                                .opacity(pulseAnimation ? 0.0 : 0.3)
-                                .animation(
-                                    .easeInOut(duration: 1.5).repeatForever(autoreverses: false),
-                                    value: pulseAnimation
-                                )
-                            
-                            Circle()
-                                .fill(Color.red)
-                                .frame(width: 70, height: 70)
-                                .shadow(color: .red.opacity(0.4), radius: 15, x: 0, y: 8)
-                            
-                            RoundedRectangle(cornerRadius: 3)
-                                .fill(Color.white)
-                                .frame(width: 14, height: 14)
-                        }
-                    }
-                    .scaleEffect(pulseAnimation ? 1.02 : 1.0)
-                    .animation(
-                        .easeInOut(duration: 1.0).repeatForever(autoreverses: true),
-                        value: pulseAnimation
-                    )
-                    .accessibilityIdentifier("StopRecordingButton")
-                    .accessibilityLabel("Stop recording")
-                }
-                .frame(height: controlsHeight)
-                .frame(maxWidth: .infinity)
-        }
-        .background(
-            // Single clean white background with rounded corners
-            Rectangle()
-                .fill(Color(.systemBackground))
-        )
-        .clipShape(
-            UnevenRoundedRectangle(
-                topLeadingRadius: 24,
-                bottomLeadingRadius: 0,
-                bottomTrailingRadius: 0,
-                topTrailingRadius: 24
-            )
-        )
-        .shadow(color: .black.opacity(0.1), radius: 20, x: 0, y: -5)
-        .ignoresSafeArea(.container, edges: .bottom)
-    }
-    
-    // MARK: - Recording Controls
-    
-    private var recordingControlsSection: some View {
-        VStack(spacing: 32) {
-            Spacer(minLength: 20)
             
-            // Recording status with pulsing red dot
-            HStack(spacing: 8) {
-                Circle()
-                    .fill(Color.red)
-                    .frame(width: 8, height: 8)
-                    .scaleEffect(pulseAnimation ? 1.3 : 1.0)
-                    .animation(
-                        .easeInOut(duration: 1.0).repeatForever(autoreverses: true),
-                        value: pulseAnimation
-                    )
-                
-                Text("Recording...")
-                    .font(.body)
+            // Transcript area - flexible height with natural scrolling
+            ScrollView {
+                ScrollViewReader { proxy in
+                    VStack(alignment: .leading, spacing: 16) {
+                        if currentTranscript.isEmpty {
+                            Text("Start speaking to see your words appear here...")
+                                .font(.body)
+                                .foregroundColor(.secondary)
+                                .italic()
+                                .lineSpacing(6)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.horizontal, 24)
+                                .padding(.vertical, 40)
+                        } else {
+                            Text(currentTranscript + (pulseAnimation ? "│" : "║"))
+                                .font(.body)
+                                .foregroundColor(.primary)
+                                .lineSpacing(6)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.horizontal, 24)
+                                .id("transcript")
+                                .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: pulseAnimation)
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .onChange(of: currentTranscript) {
+                        withAnimation(.easeOut(duration: 0.3)) {
+                            proxy.scrollTo("transcript", anchor: .bottom)
+                        }
+                    }
+                }
+            }
+            .frame(maxHeight: .infinity) // Take remaining space
+            
+            // Bottom controls - natural sizing
+            VStack(spacing: 16) {
+                // Timer pill
+                Text(formatDuration(appState.currentRecordingDuration))
+                    .font(.headline)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
-            }
-            
-            // Large stop button - RED during recording like React design
-            Button(action: stopRecording) {
-                ZStack {
-                    Circle()
-                        .fill(Color.red)
-                        .frame(width: 90, height: 90)
-                        .shadow(color: .red.opacity(0.4), radius: 15, x: 0, y: 8)
-                    
-                    RoundedRectangle(cornerRadius: 6)
-                        .fill(Color.white)
-                        .frame(width: 20, height: 20)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(
+                        Capsule()
+                            .fill(.ultraThinMaterial.opacity(0.8))
+                            .background(
+                                Capsule()
+                                    .fill(Color.white.opacity(0.3))
+                            )
+                            .overlay(
+                                Capsule()
+                                    .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                            )
+                    )
+                    .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 4)
+                
+                // Recording button
+                Button(action: stopRecording) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.red.opacity(0.3))
+                            .frame(width: 90, height: 90)
+                            .scaleEffect(pulseAnimation ? 1.1 : 1.0)
+                            .opacity(pulseAnimation ? 0.0 : 0.3)
+                            .animation(
+                                .easeInOut(duration: 1.5).repeatForever(autoreverses: false),
+                                value: pulseAnimation
+                            )
+                        
+                        Circle()
+                            .fill(Color.red)
+                            .frame(width: 70, height: 70)
+                            .shadow(color: .red.opacity(0.4), radius: 15, x: 0, y: 8)
+                        
+                        RoundedRectangle(cornerRadius: 3)
+                            .fill(Color.white)
+                            .frame(width: 14, height: 14)
+                    }
                 }
+                .scaleEffect(pulseAnimation ? 1.02 : 1.0)
+                .animation(
+                    .easeInOut(duration: 1.0).repeatForever(autoreverses: true),
+                    value: pulseAnimation
+                )
+                .accessibilityIdentifier("StopRecordingButton")
+                .accessibilityLabel("Stop recording")
             }
-            .scaleEffect(pulseAnimation ? 1.02 : 1.0)
-            .animation(
-                .easeInOut(duration: 2.0).repeatForever(autoreverses: true),
-                value: pulseAnimation
-            )
-            .accessibilityIdentifier("StopRecordingButton")
-            .accessibilityLabel("Stop recording")
-            .accessibilityHint("Tap to stop recording and process your story")
-            
-            Text("Tap to stop recording")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-            
-            Spacer(minLength: 40)
+            .padding(.bottom, 32) // Natural bottom padding
+            .frame(maxWidth: .infinity)
         }
-        .padding(.horizontal, 24)
     }
+    
     
     // MARK: - Actions
     
@@ -437,9 +342,6 @@ struct RecordingView: View {
             appState.handleError(.audioProcessingFailed)
         }
     }
-    
-    @State private var backButtonPressed = false
-    @State private var isTransitioning = false
     
     private func cancelRecording() {
         guard !isTransitioning else { return } // Prevent double-tap issues
