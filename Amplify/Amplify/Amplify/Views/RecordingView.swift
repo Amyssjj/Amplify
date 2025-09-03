@@ -20,24 +20,6 @@ struct RecordingView: View {
     
     var body: some View {
         GeometryReader { geometry in
-            // DEBUG: Device Detection
-            let deviceModel = detectiPhoneModel(width: geometry.size.width, height: geometry.size.height)
-            let _ = print("📱 DEVICE DETECTION DEBUG:")
-            let _ = print("   Screen Size: \(geometry.size.width) x \(geometry.size.height)")
-            let _ = print("   Detected Device: \(deviceModel)")
-            let _ = print("   Scale Factor: \(UIScreen.main.scale)")
-            let _ = print("   Native Resolution: \(geometry.size.width * UIScreen.main.scale) x \(geometry.size.height * UIScreen.main.scale)")
-            
-            // DEBUG: Print geometry values
-            let _ = print("📐 GEOMETRY DEBUG:")
-            let _ = print("   Total Height: \(geometry.size.height)")
-            let _ = print("   Total Width: \(geometry.size.width)")
-            let _ = print("   Safe Area Top: \(geometry.safeAreaInsets.top)")
-            let _ = print("   Safe Area Bottom: \(geometry.safeAreaInsets.bottom)")
-            let _ = print("   Photo Height (50%): \(geometry.size.height * 0.5)")
-            let _ = print("   Bottom Height (50%): \(geometry.size.height * 0.5)")
-            let _ = print("   Sum: \((geometry.size.height * 0.5) + (geometry.size.height * 0.5))")
-            let _ = print("   Is Sum Equal Total? \((geometry.size.height * 0.5) + (geometry.size.height * 0.5) == geometry.size.height)")
             VStack(spacing: 0) {
                 // Top Half - Photo Section
                 ZStack {
@@ -169,14 +151,6 @@ struct RecordingView: View {
         let totalHeight = geometry.size.height
         let bottomSheetHeight = totalHeight * 0.5
         
-        // DEBUG: Print bottom sheet calculations
-        let _ = print("📝 BOTTOM SHEET DEBUG:")
-        let _ = print("   Total Height: \(totalHeight)")
-        let _ = print("   Bottom Sheet Height: \(bottomSheetHeight)")
-        let _ = print("   Is Fractional? \(bottomSheetHeight.truncatingRemainder(dividingBy: 1) != 0)")
-        let _ = print("   Rounded Height: \(bottomSheetHeight.rounded())")
-        let _ = print("   Floor Height: \(bottomSheetHeight.rounded(.down))")
-        let _ = print("   Ceil Height: \(bottomSheetHeight.rounded(.up))")
         
         let headerHeight: CGFloat = 50 // Header space for "Listening..."
         let controlsHeight: CGFloat = 140 // Timer + button space
@@ -193,7 +167,7 @@ struct RecordingView: View {
                 }
                 .frame(height: headerHeight)
                 .frame(maxWidth: .infinity)
-                .padding(.top, 16) // Clean top padding
+                // No top padding - header should be flush with photo edge
                 
                 // Transcript area with 8-line design, text starts in middle
                 ScrollView {
