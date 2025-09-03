@@ -60,14 +60,21 @@ struct RecordingView: View {
                     Spacer()
                 }
                     
-                // Bottom sheet positioned with 5px overlap on photo
+                // Bottom sheet positioned with 15px overlap on photo
                 VStack {
-                    Spacer(minLength: geometry.size.height * 0.5 - 5) // 5px overlap on photo
+                    Spacer(minLength: geometry.size.height * 0.5 - 15) // 15px overlap on photo for seamless connection
                     bottomSheet(geometry: geometry)
                 }
                 .ignoresSafeArea(.container, edges: .bottom)
             }
         }
+        // Add white background to bottom sheet to eliminate grey gap
+        .background(
+            Color(.systemBackground)
+                .ignoresSafeArea(.all)
+        )
+        // Add subtle shadow for depth
+        .shadow(color: .black.opacity(0.1), radius: 20, x: 0, y: -5)
         .navigationBarHidden(true)
         .onAppear {
             setupRecording()
