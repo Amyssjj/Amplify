@@ -41,7 +41,7 @@ class AIInsight: ObservableObject, Identifiable, Equatable {
         self.highStakeWords = words
     }
     
-    static func == (lhs: AIInsight, rhs: AIInsight) -> Bool {
+    nonisolated static func == (lhs: AIInsight, rhs: AIInsight) -> Bool {
         return lhs.id == rhs.id
     }
 }

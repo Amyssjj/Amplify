@@ -42,7 +42,7 @@ class Recording: ObservableObject, Identifiable, Equatable {
         self.wordHighlights = highlights
     }
     
-    static func == (lhs: Recording, rhs: Recording) -> Bool {
+    nonisolated static func == (lhs: Recording, rhs: Recording) -> Bool {
         return lhs.id == rhs.id
     }
 }

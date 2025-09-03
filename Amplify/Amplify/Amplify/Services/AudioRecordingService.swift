@@ -191,19 +191,23 @@ class AudioRecordingService: NSObject, ObservableObject {
 
 extension AudioRecordingService: AVAudioRecorderDelegate {
     
-    func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
-        isRecording = false
-        stopRecordingTimer()
-        
-        if !flag {
-            // Recording failed
-            currentRecordingURL = nil
+    nonisolated func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
+        Task { @MainActor in
+            isRecording = false
+            stopRecordingTimer()
+            
+            if !flag {
+                // Recording failed
+                currentRecordingURL = nil
+            }
         }
     }
     
-    func audioRecorderEncodeErrorDidOccur(_ recorder: AVAudioRecorder, error: Error?) {
-        isRecording = false
-        stopRecordingTimer()
+    nonisolated func audioRecorderEncodeErrorDidOccur(_ recorder: AVAudioRecorder, error: Error?) {
+        Task { @MainActor in
+            isRecording = false
+            stopRecordingTimer()
+        }
         print("Audio recording encode error: \(error?.localizedDescription ?? "Unknown error")")
     }
 }
