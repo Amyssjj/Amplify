@@ -126,10 +126,12 @@ struct RecordingView: View {
     // MARK: - Bottom Sheet
     
     private func bottomSheet(geometry: GeometryProxy) -> some View {
-        let photoSectionHeight = max(100, geometry.size.height * 0.5)
-        let bottomSheetHeight = geometry.size.height - photoSectionHeight
-        let cornerOffset: CGFloat = 24 // Offset for rounded corners to align perfectly
-        let headerHeight: CGFloat = 50 // Reduced header space for closer alignment
+        // Clean single-calculation approach - perfect height arithmetic
+        let totalHeight = geometry.size.height
+        let photoHeight = totalHeight * 0.5
+        let bottomSheetHeight = totalHeight - photoHeight
+        
+        let headerHeight: CGFloat = 50 // Header space for "Listening..."
         let controlsHeight: CGFloat = 140 // Timer + button space
         let transcriptHeight = bottomSheetHeight - headerHeight - controlsHeight
         
@@ -144,7 +146,7 @@ struct RecordingView: View {
                 }
                 .frame(height: headerHeight)
                 .frame(maxWidth: .infinity)
-                .padding(.top, 8) // Minimal top padding for close alignment
+                .padding(.top, 16) // Clean top padding
                 
                 // Transcript area with 8-line design, text starts in middle
                 ScrollView {
@@ -248,23 +250,12 @@ struct RecordingView: View {
                 .frame(height: controlsHeight)
                 .frame(maxWidth: .infinity)
         }
-        .frame(height: bottomSheetHeight + cornerOffset + geometry.safeAreaInsets.bottom)
+        .frame(height: bottomSheetHeight)
         .frame(maxWidth: .infinity)
         .background(
-            // White background that fills behind rounded corners to eliminate grey gap
-            ZStack {
-                // Extended white background to fill gap behind rounded corners
-                Rectangle()
-                    .fill(Color(.systemBackground))
-                    .ignoresSafeArea(.container, edges: .bottom)
-                    .offset(y: -cornerOffset) // Extend upward to fill gap
-                
-                // Additional white fill at the boundary
-                Rectangle()
-                    .fill(Color(.systemBackground))
-                    .frame(height: cornerOffset * 2)
-                    .offset(y: -cornerOffset)
-            }
+            // Clean single white background
+            Rectangle()
+                .fill(Color(.systemBackground))
         )
         .clipShape(
             // Only round top corners, extend straight to bottom edge
@@ -276,7 +267,7 @@ struct RecordingView: View {
             )
         )
         .shadow(color: .black.opacity(0.1), radius: 20, x: 0, y: -5)
-        .offset(y: -cornerOffset) // Move up to align "Listening" with photo bottom
+        .ignoresSafeArea(.container, edges: .bottom)
     }
     
     // MARK: - Recording Controls
