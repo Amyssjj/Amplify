@@ -45,7 +45,6 @@ struct RecordingView: View {
                 
                 // Bottom Half - White Sheet
                 bottomSheet(geometry: geometry)
-                    .frame(height: max(100, geometry.size.height * 0.5))
             }
         }
         .navigationBarHidden(true)
