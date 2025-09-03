@@ -43,10 +43,12 @@ struct RecordingView: View {
                 .frame(width: geometry.size.width, height: geometry.size.height * 0.5)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)  // Fill entire allocated space
                 .background(Color.blue.opacity(0.3))  // DEBUG: Photo section background
+                .clipped()  // Prevent overflow beyond boundaries
                 .ignoresSafeArea(.container, edges: .top)
                 
                 // Bottom Half - White Sheet
                 bottomSheet(geometry: geometry)
+                    .clipped()  // Prevent overflow beyond boundaries
                     .ignoresSafeArea(.container, edges: .bottom)
             }
             .background(Color.red.opacity(0.5))  // DEBUG: Main VStack container background
