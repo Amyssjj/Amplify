@@ -45,100 +45,107 @@ struct RecordingView: View {
     // MARK: - Header View
     
     private var headerView: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 20) {
+            // Top navigation bar
             HStack {
                 Button("Cancel") {
                     cancelRecording()
                 }
                 .foregroundColor(.red)
+                .font(.body)
                 .accessibilityIdentifier("CancelRecordingButton")
                 
                 Spacer()
                 
-                // Recording timer
+                // Recording timer - prominent center position
                 Text(formatDuration(appState.currentRecordingDuration))
-                    .font(.title2)
+                    .font(.title)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
                     .accessibilityIdentifier("RecordingTimer")
                 
                 Spacer()
                 
-                // Progress indicator
-                CircularProgressView(
-                    progress: appState.currentRecordingDuration / maxRecordingDuration,
-                    lineWidth: 3
-                )
-                .frame(width: 24, height: 24)
+                // Settings/More button (3 dots) like in design
+                Button {
+                    // Settings action - placeholder
+                } label: {
+                    CircularProgressView(
+                        progress: appState.currentRecordingDuration / maxRecordingDuration,
+                        lineWidth: 3
+                    )
+                    .frame(width: 24, height: 24)
+                }
             }
             .padding(.horizontal, 24)
-            .padding(.top, 20)
+            .padding(.top, 16)
             
-            // Photo reference (smaller)
+            // Photo thumbnail - centered and smaller like design
             if let photo = appState.currentPhoto {
                 Image(uiImage: photo.image)
                     .resizable()
                     .aspectRatio(contentMode: .fill)
-                    .frame(width: 80, height: 80)
+                    .frame(width: 60, height: 60)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
                     )
             }
         }
-        .padding(.bottom, 24)
+        .padding(.bottom, 16)
     }
     
     // MARK: - Transcript Section
     
     private func transcriptSection(geometry: GeometryProxy) -> some View {
         VStack(alignment: .leading, spacing: 16) {
+            // Header with Live Transcript title and 3-dot menu
             HStack {
                 Text("Live Transcript")
-                    .font(.headline)
+                    .font(.title3)
+                    .fontWeight(.semibold)
                     .foregroundColor(.primary)
                 
                 Spacer()
                 
-                if speechService.isRecognizing {
-                    HStack(spacing: 4) {
-                        ForEach(0..<3) { index in
+                // 3-dot menu button matching design
+                Button {
+                    // Menu action - placeholder
+                } label: {
+                    HStack(spacing: 3) {
+                        ForEach(0..<3) { _ in
                             Circle()
                                 .fill(Color.blue)
-                                .frame(width: 6, height: 6)
-                                .scaleEffect(pulseAnimation ? 1.0 : 0.5)
-                                .animation(
-                                    .easeInOut(duration: 0.6)
-                                    .repeatForever(autoreverses: true)
-                                    .delay(Double(index) * 0.2),
-                                    value: pulseAnimation
-                                )
+                                .frame(width: 4, height: 4)
                         }
                     }
                 }
             }
             
-            // Transcript container
+            // Large transcript container - matching design
             ScrollView {
                 ScrollViewReader { proxy in
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: 12) {
                         if currentTranscript.isEmpty {
                             Text("Start speaking to see your words appear here...")
                                 .font(.body)
                                 .foregroundColor(.secondary)
                                 .italic()
+                                .padding(.top, 20)
                         } else {
                             Text(currentTranscript)
                                 .font(.body)
                                 .foregroundColor(.primary)
+                                .lineSpacing(4)
                                 .id("transcript")
                         }
                         
-                        Spacer(minLength: 20)
+                        Spacer(minLength: 40)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 16)
                     .onChange(of: currentTranscript) { _ in
                         withAnimation(.easeOut(duration: 0.3)) {
                             proxy.scrollTo("transcript", anchor: .bottom)
@@ -146,13 +153,13 @@ struct RecordingView: View {
                     }
                 }
             }
-            .frame(minHeight: 200)
+            .frame(minHeight: 250)
             .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(.ultraThinMaterial)
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Color(.systemGray6))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(Color(.systemGray4), lineWidth: 0.5)
                     )
             )
             .accessibilityIdentifier("LiveTranscript")
@@ -164,24 +171,27 @@ struct RecordingView: View {
     // MARK: - Recording Controls
     
     private var recordingControlsSection: some View {
-        VStack(spacing: 24) {
-            // Recording status
+        VStack(spacing: 32) {
+            Spacer(minLength: 20)
+            
+            // Recording status with pulsing red dot
             HStack(spacing: 8) {
                 Circle()
                     .fill(Color.red)
-                    .frame(width: 12, height: 12)
-                    .scaleEffect(pulseAnimation ? 1.2 : 1.0)
+                    .frame(width: 8, height: 8)
+                    .scaleEffect(pulseAnimation ? 1.3 : 1.0)
                     .animation(
                         .easeInOut(duration: 1.0).repeatForever(autoreverses: true),
                         value: pulseAnimation
                     )
                 
                 Text("Recording...")
-                    .font(.headline)
+                    .font(.body)
+                    .fontWeight(.medium)
                     .foregroundColor(.primary)
             }
             
-            // Stop button
+            // Large stop button matching design exactly
             Button(action: stopRecording) {
                 ZStack {
                     Circle()
@@ -192,14 +202,19 @@ struct RecordingView: View {
                                 endPoint: .bottomTrailing
                             )
                         )
-                        .frame(width: 80, height: 80)
-                        .shadow(color: .blue.opacity(0.3), radius: 10, x: 0, y: 5)
+                        .frame(width: 90, height: 90)
+                        .shadow(color: .blue.opacity(0.3), radius: 15, x: 0, y: 8)
                     
-                    RoundedRectangle(cornerRadius: 8)
+                    RoundedRectangle(cornerRadius: 6)
                         .fill(Color.white)
-                        .frame(width: 24, height: 24)
+                        .frame(width: 20, height: 20)
                 }
             }
+            .scaleEffect(pulseAnimation ? 1.02 : 1.0)
+            .animation(
+                .easeInOut(duration: 2.0).repeatForever(autoreverses: true),
+                value: pulseAnimation
+            )
             .accessibilityIdentifier("StopRecordingButton")
             .accessibilityLabel("Stop recording")
             .accessibilityHint("Tap to stop recording and process your story")
@@ -207,9 +222,10 @@ struct RecordingView: View {
             Text("Tap to stop recording")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
+            
+            Spacer(minLength: 40)
         }
-        .padding(.horizontal)
-        .padding(.bottom, 40)
+        .padding(.horizontal, 24)
     }
     
     // MARK: - Actions
