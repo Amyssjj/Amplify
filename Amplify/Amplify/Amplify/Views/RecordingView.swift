@@ -45,6 +45,7 @@ struct RecordingView: View {
                 
                 // Bottom Half - White Sheet
                 bottomSheet(geometry: geometry)
+                    .ignoresSafeArea(.container, edges: .bottom)
             }
         }
         .navigationBarHidden(true)
@@ -232,20 +233,24 @@ struct RecordingView: View {
                 .frame(height: controlsHeight)
                 .frame(maxWidth: .infinity)
         }
-        .frame(height: bottomSheetHeight)
+        .frame(height: bottomSheetHeight + geometry.safeAreaInsets.bottom)
         .frame(maxWidth: .infinity)
         .background(
-            // Custom shape that only rounds top corners, fills bottom completely
+            // White background that extends to screen edge
+            Rectangle()
+                .fill(Color(.systemBackground))
+                .ignoresSafeArea(.container, edges: .bottom)
+        )
+        .clipShape(
+            // Only round top corners, extend straight to bottom edge
             UnevenRoundedRectangle(
                 topLeadingRadius: 24,
                 bottomLeadingRadius: 0,
                 bottomTrailingRadius: 0,
                 topTrailingRadius: 24
             )
-            .fill(Color(.systemBackground))
-            .shadow(color: .black.opacity(0.1), radius: 20, x: 0, y: -5)
         )
-        .clipped() // Ensure no overflow
+        .shadow(color: .black.opacity(0.1), radius: 20, x: 0, y: -5)
     }
     
     // MARK: - Recording Controls
