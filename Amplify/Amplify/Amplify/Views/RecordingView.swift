@@ -21,7 +21,7 @@ struct RecordingView: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack(alignment: .top) {
-                // Full-screen immersive photo background
+                // Full-screen immersive photo background OR fallback
                 if let photo = appState.currentPhoto {
                     print("🖼️ DEBUG: RecordingView rendering photo successfully")
                     Image(uiImage: photo.image)
@@ -32,6 +32,10 @@ struct RecordingView: View {
                         .ignoresSafeArea(.all)  // True immersive - cover status bar
                 } else {
                     print("❌ DEBUG: RecordingView - appState.currentPhoto is NIL")
+                    // Fallback background when no photo
+                    Color(.systemBackground)
+                        .ignoresSafeArea(.all)
+                    
                     // DEBUG: Show when no photo is available - make it very visible
                     VStack {
                         Text("❌ DEBUG")
@@ -49,10 +53,6 @@ struct RecordingView: View {
                     .cornerRadius(12)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
-                
-                // Fallback background for areas not covered by photo
-                Color(.systemBackground)
-                    .ignoresSafeArea(.all)
                     
                 // Photo overlay controls positioned at top
                 VStack {
