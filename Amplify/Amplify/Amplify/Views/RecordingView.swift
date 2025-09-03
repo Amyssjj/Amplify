@@ -120,7 +120,7 @@ struct RecordingView: View {
             )
         }
         .padding(.horizontal, 16)
-        .padding(.top, geometry.safeAreaInsets.top + 8)
+        .padding(.top, max(0, geometry.safeAreaInsets.top + 8))
     }
     
     // MARK: - Bottom Sheet
@@ -172,7 +172,7 @@ struct RecordingView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 20)
                         .padding(.vertical, 16)
-                        .onChange(of: currentTranscript) { _ in
+                        .onChange(of: currentTranscript) {
                             withAnimation(.easeOut(duration: 0.3)) {
                                 proxy.scrollTo("transcript", anchor: .bottom)
                             }
@@ -311,18 +311,18 @@ struct RecordingView: View {
                             appState.startRecording()
                             recordingStarted = true
                             pulseAnimation = true
-                        case .failure(let error):
+                        case .failure(_):
                             appState.handleError(.speechRecognitionAccessDenied)
                         }
                     }
                     
-                case .failure(let error):
+                case .failure(_):
                     await MainActor.run {
                         appState.handleError(.recordingFailed)
                     }
                 }
                 
-            case .failure(let error):
+            case .failure(_):
                 await MainActor.run {
                     appState.handleError(.microphoneAccessDenied)
                 }
@@ -352,7 +352,7 @@ struct RecordingView: View {
             
             appState.stopRecording(with: recording)
             
-        case .failure(let error):
+        case .failure(_):
             appState.handleError(.audioProcessingFailed)
         }
     }

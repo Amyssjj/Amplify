@@ -48,12 +48,13 @@ class Recording: ObservableObject, Identifiable, Equatable {
 }
 
 struct WordHighlight: Identifiable, Codable {
-    let id = UUID()
+    let id: UUID
     let word: String
     let timestamp: Double
     let suggested: String?
     
     init(word: String, timestamp: Double, suggested: String? = nil) {
+        self.id = UUID()
         self.word = word
         self.timestamp = timestamp
         self.suggested = suggested

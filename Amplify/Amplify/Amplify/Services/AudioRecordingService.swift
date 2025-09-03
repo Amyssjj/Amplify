@@ -37,7 +37,7 @@ class AudioRecordingService: NSObject, ObservableObject {
         }
         
         return await withCheckedContinuation { continuation in
-            audioSession.requestRecordPermission { granted in
+            AVAudioApplication.requestRecordPermission { granted in
                 DispatchQueue.main.async {
                     continuation.resume(returning: granted ? .authorized : .denied)
                 }
@@ -166,7 +166,9 @@ class AudioRecordingService: NSObject, ObservableObject {
     
     private func startRecordingTimer() {
         recordingTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
-            self?.updateRecordingDuration()
+            Task { @MainActor in
+                self?.updateRecordingDuration()
+            }
         }
     }
     

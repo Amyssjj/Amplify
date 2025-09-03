@@ -162,14 +162,21 @@ struct ProcessingView: View {
         }
         
         // Phase animation (message cycling)
-        Timer.scheduledTimer(withTimeInterval: 1.5, repeats: true) { timer in
-            withAnimation(.easeInOut(duration: 0.5)) {
-                animationPhase = (animationPhase + 1) % animationMessages.count
-            }
-            
-            // Stop timer when processing is complete
-            if aiService.processingProgress >= 1.0 {
-                timer.invalidate()
+        Timer.scheduledTimer(withTimeInterval: 1.5, repeats: true) { [weak self] timer in
+            Task { @MainActor in
+                guard let self = self else {
+                    timer.invalidate()
+                    return
+                }
+                
+                withAnimation(.easeInOut(duration: 0.5)) {
+                    self.animationPhase = (self.animationPhase + 1) % self.animationMessages.count
+                }
+                
+                // Stop timer when processing is complete
+                if self.aiService.processingProgress >= 1.0 {
+                    timer.invalidate()
+                }
             }
         }
     }
@@ -203,7 +210,7 @@ struct ProcessingView: View {
                     await appState.transitionToResults(with: enhancement.insights)
                 }
                 
-            case .failure(let error):
+            case .failure(_):
                 switch error {
                 case .networkError:
                     appState.handleError(.networkError)
