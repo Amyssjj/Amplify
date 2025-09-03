@@ -106,7 +106,10 @@ struct HomeView: View {
                         Image(uiImage: photo.image)
                             .resizable()
                             .aspectRatio(contentMode: .fill)
-                            .frame(height: min(geometry.size.height * 0.35, 280))
+                            .frame(
+                                maxWidth: geometry.size.width - 48,
+                                maxHeight: min(geometry.size.height * 0.35, 280)
+                            )
                             .clipShape(RoundedRectangle(cornerRadius: 24))
                             .overlay(
                                 // Subtle gradient overlay like React
@@ -131,7 +134,10 @@ struct HomeView: View {
                     }
                 }
             }
-            .frame(height: min(geometry.size.height * 0.35, 280))
+            .frame(
+                maxWidth: geometry.size.width - 48,
+                maxHeight: min(geometry.size.height * 0.35, 280)
+            )
             .padding(.horizontal, 24)
             .gesture(
                 DragGesture()
