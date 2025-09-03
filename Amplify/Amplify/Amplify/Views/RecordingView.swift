@@ -20,17 +20,31 @@ struct RecordingView: View {
     
     var body: some View {
         GeometryReader { geometry in
-            VStack(spacing: 0) {
-                // Header with photo reference
-                headerView
+            ZStack {
+                // Top Half - Full Photo Background
+                VStack(spacing: 0) {
+                    if let photo = appState.currentPhoto {
+                        Image(uiImage: photo.image)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(height: geometry.size.height * 0.6)
+                            .clipped()
+                    }
+                    Spacer()
+                }
+                .ignoresSafeArea(.all, edges: .top)
                 
-                // Live transcript section
-                transcriptSection(geometry: geometry)
+                // Photo Overlay Controls
+                VStack {
+                    photoOverlayControls
+                    Spacer()
+                }
                 
-                // Recording controls
-                recordingControlsSection
-                
-                Spacer()
+                // Bottom Sheet
+                VStack {
+                    Spacer()
+                    bottomSheet(geometry: geometry)
+                }
             }
         }
         .navigationBarHidden(true)
@@ -42,130 +56,175 @@ struct RecordingView: View {
         }
     }
     
-    // MARK: - Header View
+    // MARK: - Photo Overlay Controls
     
-    private var headerView: some View {
-        VStack(spacing: 20) {
-            // Top navigation bar
-            HStack {
-                Button("Cancel") {
-                    cancelRecording()
+    private var photoOverlayControls: some View {
+        HStack {
+            // Back button
+            Button {
+                cancelRecording()
+            } label: {
+                Circle()
+                    .fill(.ultraThinMaterial.opacity(0.8))
+                    .background(
+                        Circle()
+                            .fill(Color.white.opacity(0.3))
+                    )
+                    .overlay(
+                        Circle()
+                            .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                    )
+                    .frame(width: 40, height: 40)
+                    .overlay(
+                        Image(systemName: "arrow.left")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundColor(.primary)
+                    )
+            }
+            .accessibilityIdentifier("CancelRecordingButton")
+            
+            Spacer()
+            
+            // REC indicator
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(Color.red)
+                    .frame(width: 8, height: 8)
+                    .scaleEffect(pulseAnimation ? 1.3 : 1.0)
+                    .animation(
+                        .easeInOut(duration: 1.0).repeatForever(autoreverses: true),
+                        value: pulseAnimation
+                    )
+                
+                Text("REC")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundColor(.primary)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(
+                Capsule()
+                    .fill(.ultraThinMaterial.opacity(0.8))
+                    .background(
+                        Capsule()
+                            .fill(Color.white.opacity(0.3))
+                    )
+                    .overlay(
+                        Capsule()
+                            .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                    )
+            )
+        }
+        .padding(.horizontal, 24)
+        .padding(.top, 16)
+    }
+    
+    // MARK: - Bottom Sheet
+    
+    private func bottomSheet(geometry: GeometryProxy) -> some View {
+        VStack(spacing: 0) {
+            // White rounded sheet
+            VStack(spacing: 24) {
+                // "Listening..." header
+                VStack(spacing: 16) {
+                    Text("Listening...")
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.primary)
                 }
-                .foregroundColor(.red)
-                .font(.body)
-                .accessibilityIdentifier("CancelRecordingButton")
+                .padding(.top, 24)
                 
-                Spacer()
+                // Transcript area
+                ScrollView {
+                    ScrollViewReader { proxy in
+                        VStack(alignment: .leading, spacing: 8) {
+                            if currentTranscript.isEmpty {
+                                Text("Start speaking to see your words appear here...")
+                                    .font(.body)
+                                    .foregroundColor(.secondary)
+                                    .italic()
+                            } else {
+                                HStack {
+                                    Text(currentTranscript)
+                                        .font(.body)
+                                        .foregroundColor(.primary)
+                                        .lineSpacing(2)
+                                        .id("transcript")
+                                    
+                                    // Blinking cursor
+                                    Rectangle()
+                                        .fill(Color.blue)
+                                        .frame(width: 2, height: 20)
+                                        .opacity(pulseAnimation ? 1.0 : 0.3)
+                                        .animation(
+                                            .easeInOut(duration: 0.8).repeatForever(autoreverses: true),
+                                            value: pulseAnimation
+                                        )
+                                    
+                                    Spacer()
+                                }
+                            }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 16)
+                        .onChange(of: currentTranscript) { _ in
+                            withAnimation(.easeOut(duration: 0.3)) {
+                                proxy.scrollTo("transcript", anchor: .bottom)
+                            }
+                        }
+                    }
+                }
+                .frame(height: 120)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color(.systemGray6))
+                )
+                .padding(.horizontal, 20)
                 
-                // Recording timer - prominent center position
+                Spacer(minLength: 40)
+                
+                // Timer
                 Text(formatDuration(appState.currentRecordingDuration))
                     .font(.title)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
-                    .accessibilityIdentifier("RecordingTimer")
                 
-                Spacer()
-                
-                // Settings/More button (3 dots) like in design
-                Button {
-                    // Settings action - placeholder
-                } label: {
-                    CircularProgressView(
-                        progress: appState.currentRecordingDuration / maxRecordingDuration,
-                        lineWidth: 3
-                    )
-                    .frame(width: 24, height: 24)
-                }
-            }
-            .padding(.horizontal, 24)
-            .padding(.top, 16)
-            
-            // Photo thumbnail - centered and smaller like design
-            if let photo = appState.currentPhoto {
-                Image(uiImage: photo.image)
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: 60, height: 60)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
-                    )
-            }
-        }
-        .padding(.bottom, 16)
-    }
-    
-    // MARK: - Transcript Section
-    
-    private func transcriptSection(geometry: GeometryProxy) -> some View {
-        VStack(alignment: .leading, spacing: 16) {
-            // Header with Live Transcript title and 3-dot menu
-            HStack {
-                Text("Live Transcript")
-                    .font(.title3)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.primary)
-                
-                Spacer()
-                
-                // 3-dot menu button matching design
-                Button {
-                    // Menu action - placeholder
-                } label: {
-                    HStack(spacing: 3) {
-                        ForEach(0..<3) { _ in
-                            Circle()
-                                .fill(Color.blue)
-                                .frame(width: 4, height: 4)
-                        }
-                    }
-                }
-            }
-            
-            // Large transcript container - matching design
-            ScrollView {
-                ScrollViewReader { proxy in
-                    VStack(alignment: .leading, spacing: 12) {
-                        if currentTranscript.isEmpty {
-                            Text("Start speaking to see your words appear here...")
-                                .font(.body)
-                                .foregroundColor(.secondary)
-                                .italic()
-                                .padding(.top, 20)
-                        } else {
-                            Text(currentTranscript)
-                                .font(.body)
-                                .foregroundColor(.primary)
-                                .lineSpacing(4)
-                                .id("transcript")
-                        }
+                // Stop button
+                Button(action: stopRecording) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.red)
+                            .frame(width: 80, height: 80)
+                            .shadow(color: .red.opacity(0.4), radius: 15, x: 0, y: 8)
                         
-                        Spacer(minLength: 40)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 16)
-                    .onChange(of: currentTranscript) { _ in
-                        withAnimation(.easeOut(duration: 0.3)) {
-                            proxy.scrollTo("transcript", anchor: .bottom)
-                        }
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(Color.white)
+                            .frame(width: 16, height: 16)
                     }
                 }
+                .scaleEffect(pulseAnimation ? 1.02 : 1.0)
+                .animation(
+                    .easeInOut(duration: 2.0).repeatForever(autoreverses: true),
+                    value: pulseAnimation
+                )
+                .accessibilityIdentifier("StopRecordingButton")
+                .accessibilityLabel("Stop recording")
+                
+                Text("Tap to stop recording")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                
+                Spacer(minLength: 32)
             }
-            .frame(minHeight: 250)
             .background(
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(Color(.systemGray6))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 20)
-                            .stroke(Color(.systemGray4), lineWidth: 0.5)
-                    )
+                RoundedRectangle(cornerRadius: 24)
+                    .fill(Color(.systemBackground))
+                    .shadow(color: .black.opacity(0.1), radius: 20, x: 0, y: -5)
             )
-            .accessibilityIdentifier("LiveTranscript")
-            .accessibilityLabel("Live transcript of your recording")
         }
-        .padding(.horizontal, 24)
+        .frame(height: geometry.size.height * 0.55)
     }
     
     // MARK: - Recording Controls
