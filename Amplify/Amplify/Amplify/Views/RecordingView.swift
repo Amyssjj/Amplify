@@ -84,7 +84,7 @@ struct RecordingView: View {
         switch dimensions {
         case "390x844": return "iPhone 14, iPhone 15"
         case "393x852": return "iPhone 14 Pro, iPhone 15 Pro" 
-        case "402x874": return "iPhone 16 Pro"
+        case "402x778": return "iPhone 16 Pro"
         case "430x932": return "iPhone 14 Plus, iPhone 15 Plus"
         case "440x956": return "iPhone 16 Pro Max"
         case "375x812": return "iPhone 13 mini"
