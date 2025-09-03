@@ -40,7 +40,7 @@ struct RecordingView: View {
                         Spacer()
                     }
                 }
-                .frame(height: geometry.size.height * 0.5)
+                .frame(height: geometry.safeAreaInsets.top + (geometry.size.height - geometry.safeAreaInsets.top - geometry.safeAreaInsets.bottom) * 0.5)
                 .ignoresSafeArea(.container, edges: .top)
                 
                 // Bottom Half - White Sheet
@@ -126,10 +126,16 @@ struct RecordingView: View {
     // MARK: - Bottom Sheet
     
     private func bottomSheet(geometry: GeometryProxy) -> some View {
-        // Clean single-calculation approach - perfect height arithmetic
+        // Height calculations accounting for ignoresSafeArea extensions
         let totalHeight = geometry.size.height
-        let photoHeight = totalHeight * 0.5
-        let bottomSheetHeight = totalHeight - photoHeight
+        let safeAreaTop = geometry.safeAreaInsets.top
+        let safeAreaBottom = geometry.safeAreaInsets.bottom
+        
+        // For immersive experience: photo extends into top safe area, bottom extends into bottom safe area
+        // Visible area calculation to ensure perfect middle alignment
+        let visibleHeight = totalHeight - safeAreaTop - safeAreaBottom
+        let photoVisibleHeight = visibleHeight * 0.5 + safeAreaTop  // Add safe area top extension
+        let bottomSheetHeight = visibleHeight * 0.5 + safeAreaBottom  // Add safe area bottom extension
         
         let headerHeight: CGFloat = 50 // Header space for "Listening..."
         let controlsHeight: CGFloat = 140 // Timer + button space
