@@ -41,13 +41,12 @@ struct RecordingView: View {
                     Spacer()
                 }
                     
-                    // Bottom sheet positioned naturally from bottom
-                    VStack {
-                        Spacer(minLength: geometry.size.height * 0.5) // Natural spacing instead of forced split
-                        bottomSheet(geometry: geometry)
-                    }
-                    .ignoresSafeArea(.container, edges: .bottom)
+                // Bottom sheet positioned naturally from bottom
+                VStack {
+                    Spacer(minLength: geometry.size.height * 0.5) // Natural spacing instead of forced split
+                    bottomSheet(geometry: geometry)
                 }
+                .ignoresSafeArea(.container, edges: .bottom)
             }
         }
         .navigationBarHidden(true)
