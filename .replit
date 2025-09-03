@@ -1,5 +1,5 @@
 entrypoint = "main.swift"
-modules = ["swift", "nodejs-20"]
+modules = ["swift", "nodejs-20", "swift-5.8"]
 
 [nix]
 channel = "stable-24_05"
