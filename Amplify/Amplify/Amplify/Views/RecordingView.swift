@@ -167,7 +167,7 @@ struct RecordingView: View {
                         }
                     }
                 }
-                .frame(height: 160) // Fixed height for exactly 7 lines of text
+                .frame(height: 230) // Fixed height for exactly 10 lines of text
                 .padding(.horizontal, 0)
                 
                 Spacer(minLength: 60)
