@@ -208,7 +208,7 @@ struct ProcessingView: View {
                     await appState.transitionToResults(with: enhancement.insights)
                 }
                 
-            case .failure(_):
+            case .failure(let error):
                 switch error {
                 case .networkError:
                     appState.handleError(.networkError)
