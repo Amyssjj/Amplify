@@ -63,7 +63,7 @@ struct ContentView: View {
                     insertion: customTransition(for: appState.currentScreen),
                     removal: customTransition(for: appState.currentScreen)
                 ))
-                .animation(.easeOut(duration: 0.15), value: appState.currentScreen)
+                .animation(.interpolatingSpring(stiffness: 300, damping: 30), value: appState.currentScreen)
             }
         }
         .alert(
@@ -83,8 +83,15 @@ struct ContentView: View {
     private func customTransition(for screen: AppScreen) -> AnyTransition {
         switch screen {
         case .recording:
-            // Sophisticated photo expansion and bottom sheet choreography
-            return AnyTransition.opacity
+            // Sophisticated photo expansion with visual flair
+            return AnyTransition.asymmetric(
+                insertion: .scale(scale: 0.92, anchor: .center)
+                    .combined(with: .move(edge: .bottom))
+                    .combined(with: .opacity),
+                removal: .scale(scale: 1.08, anchor: .center)
+                    .combined(with: .move(edge: .top))
+                    .combined(with: .opacity)
+            )
         case .processing:
             return AnyTransition.asymmetric(
                 insertion: .opacity.combined(with: .scale(scale: 0.9, anchor: .center)),
