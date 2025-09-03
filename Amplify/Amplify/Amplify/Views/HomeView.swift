@@ -200,8 +200,13 @@ struct HomeView: View {
     @State private var isTransitioning = false
     
     private func startRecording() {
-        guard let photo = currentPhoto else { return }
+        guard let photo = currentPhoto else { 
+            print("🚨 DEBUG: HomeView currentPhoto is nil - cannot start recording")
+            return 
+        }
         guard !isTransitioning else { return } // Prevent double-tap issues
+        
+        print("✅ DEBUG: HomeView has photo, transferring to AppState...")
         
         isTransitioning = true
         
@@ -215,6 +220,7 @@ struct HomeView: View {
         // Ultra-smooth transition with spring physics - consistent every time
         withAnimation(.interpolatingSpring(stiffness: 300, damping: 30)) {
             appState.transitionToRecording(with: photo)
+            print("📤 DEBUG: Called appState.transitionToRecording with photo")
         }
         
         // Reset states quickly

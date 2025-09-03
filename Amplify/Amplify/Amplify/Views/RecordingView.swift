@@ -30,11 +30,22 @@ struct RecordingView: View {
                         .clipped()
                         .ignoresSafeArea(.all)  // True immersive - cover status bar
                 } else {
-                    // DEBUG: Show when no photo is available
-                    Text("No photo available\nappState.currentPhoto is nil")
-                        .foregroundColor(.red)
-                        .multilineTextAlignment(.center)
-                        .padding()
+                    // DEBUG: Show when no photo is available - make it very visible
+                    VStack {
+                        Text("❌ DEBUG")
+                            .font(.largeTitle)
+                            .foregroundColor(.red)
+                        Text("No photo available")
+                            .font(.title2)
+                            .foregroundColor(.red)
+                        Text("appState.currentPhoto is nil")
+                            .font(.body)
+                            .foregroundColor(.red)
+                    }
+                    .padding()
+                    .background(Color.yellow.opacity(0.8))
+                    .cornerRadius(12)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
                 
                 // Fallback background for areas not covered by photo
