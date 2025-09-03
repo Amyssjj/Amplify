@@ -56,6 +56,12 @@
     server: {
       host: '0.0.0.0',
       port: 5000,
-      allowedHosts: 'all'
+      allowedHosts: [
+        'localhost',
+        '127.0.0.1',
+        '0.0.0.0',
+        '.replit.dev',
+        'cf1079f2-936a-48a0-9f09-8b919af9a5d3-00-3uffn7dgl38mn.picard.replit.dev'
+      ]
     },
   });
