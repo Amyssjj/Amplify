@@ -23,32 +23,29 @@ struct HomeView: View {
                 backgroundAnimations
                 
                 VStack(spacing: 0) {
-                    // Header
+                    // Header - always visible
                     headerView
-                        .padding(.top, geometry.safeAreaInsets.top + 16)
-                        .padding(.bottom, 16)
+                        .padding(.top, 16)
+                        .padding(.bottom, 8)
                     
-                    // Main content area - properly sized
-                    VStack {
-                        Spacer(minLength: 20)
-                        
-                        // Photo prompt section  
-                        photoPromptSection(geometry: geometry)
-                        
-                        // Dots indicator
-                        dotsIndicator
-                            .padding(.top, 20)
-                        
-                        Spacer(minLength: 40)
+                    // Main scrollable content area
+                    ScrollView(.vertical, showsIndicators: false) {
+                        VStack(spacing: 16) {
+                            // Photo prompt section  
+                            photoPromptSection(geometry: geometry)
+                            
+                            // Dots indicator
+                            dotsIndicator
+                        }
+                        .padding(.vertical, 20)
                     }
                     
                     // Record button section at bottom
                     recordButtonSection
-                        .padding(.bottom, geometry.safeAreaInsets.bottom + 20)
+                        .padding(.bottom, 20)
                 }
             }
         }
-        .ignoresSafeArea(.all, edges: .all)
         .navigationBarHidden(true)
         .task {
             await loadInitialPhoto()
@@ -103,13 +100,13 @@ struct HomeView: View {
                 if isLoadingPhoto {
                     ProgressView()
                         .scaleEffect(1.5)
-                        .frame(height: 320)
+                        .frame(height: min(geometry.size.height * 0.35, 280))
                 } else if let photo = currentPhoto {
                     VStack(spacing: 0) {
                         Image(uiImage: photo.image)
                             .resizable()
                             .aspectRatio(contentMode: .fill)
-                            .frame(height: 320)
+                            .frame(height: min(geometry.size.height * 0.35, 280))
                             .clipShape(RoundedRectangle(cornerRadius: 24))
                             .overlay(
                                 // Subtle gradient overlay like React
@@ -134,7 +131,7 @@ struct HomeView: View {
                     }
                 }
             }
-            .frame(height: min(geometry.size.height * 0.4, 320))
+            .frame(height: min(geometry.size.height * 0.35, 280))
             .padding(.horizontal, 24)
             .gesture(
                 DragGesture()
