@@ -40,7 +40,8 @@ struct RecordingView: View {
                         Spacer()
                     }
                 }
-                .frame(height: geometry.size.height * 0.5)
+                .frame(width: geometry.size.width, height: geometry.size.height * 0.5)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)  // Fill entire allocated space
                 .background(Color.blue.opacity(0.3))  // DEBUG: Photo section background
                 .ignoresSafeArea(.container, edges: .top)
                 
@@ -274,8 +275,8 @@ struct RecordingView: View {
                 .frame(height: controlsHeight)
                 .frame(maxWidth: .infinity)
         }
-        .frame(height: bottomSheetHeight)
-        .frame(maxWidth: .infinity)
+        .frame(width: geometry.size.width, height: bottomSheetHeight)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)  // Fill entire allocated space
         .background(
             // DEBUG: Bottom sheet background
             Rectangle()
