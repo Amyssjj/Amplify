@@ -25,26 +25,30 @@ struct HomeView: View {
                 VStack(spacing: 0) {
                     // Header
                     headerView
-                        .padding(.top, 32)
+                        .padding(.top, geometry.safeAreaInsets.top + 16)
                         .padding(.bottom, 16)
                     
-                    // Main content area - centered like React
+                    // Main content area - properly sized
                     VStack {
-                        Spacer()
+                        Spacer(minLength: 20)
                         
                         // Photo prompt section  
                         photoPromptSection(geometry: geometry)
-                            .padding(.bottom, 80)
                         
-                        Spacer()
+                        // Dots indicator
+                        dotsIndicator
+                            .padding(.top, 20)
+                        
+                        Spacer(minLength: 40)
                     }
                     
                     // Record button section at bottom
                     recordButtonSection
-                        .padding(.bottom, 48)
+                        .padding(.bottom, geometry.safeAreaInsets.bottom + 20)
                 }
             }
         }
+        .ignoresSafeArea(.all, edges: .all)
         .navigationBarHidden(true)
         .task {
             await loadInitialPhoto()
@@ -127,36 +131,10 @@ struct HomeView: View {
                                     await refreshPhoto()
                                 }
                             }
-                        
-                        // Swipe hint with glass button effect like React
-                        HStack {
-                            Image(systemName: "arrow.clockwise")
-                                .font(.system(size: 12))
-                                .foregroundColor(Color(.systemGray2))
-                            Text("Swipe for new photo")
-                                .font(.caption)
-                                .fontWeight(.medium)
-                                .foregroundColor(Color(.systemGray2))
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
-                        .background(
-                            RoundedRectangle(cornerRadius: 20)
-                                .fill(.ultraThinMaterial.opacity(0.8))
-                                .background(
-                                    RoundedRectangle(cornerRadius: 20)
-                                        .fill(Color.white.opacity(0.3))
-                                )
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 20)
-                                        .stroke(Color.white.opacity(0.3), lineWidth: 1)
-                                )
-                        )
-                        .offset(y: -16)
                     }
                 }
             }
-            .frame(height: 320)
+            .frame(height: min(geometry.size.height * 0.4, 320))
             .padding(.horizontal, 24)
             .gesture(
                 DragGesture()
@@ -308,6 +286,19 @@ struct HomeView: View {
                 .position(x: UIScreen.main.bounds.width * 0.2, y: UIScreen.main.bounds.height * 0.8)
         }
         .allowsHitTesting(false) // Don't interfere with touch events
+    }
+    
+    // MARK: - Dots Indicator - Shows swipe capability
+    
+    private var dotsIndicator: some View {
+        HStack(spacing: 8) {
+            ForEach(0..<5, id: \.self) { index in
+                Circle()
+                    .fill(Color.gray.opacity(index == 0 ? 0.8 : 0.3))
+                    .frame(width: 6, height: 6)
+                    .animation(.easeInOut(duration: 0.3), value: true)
+            }
+        }
     }
 }
 
