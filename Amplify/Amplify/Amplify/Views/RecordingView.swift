@@ -20,28 +20,32 @@ struct RecordingView: View {
     
     var body: some View {
         GeometryReader { geometry in
-            ZStack {
-                // Top Half - Full Photo Background
-                if let photo = appState.currentPhoto {
-                    Image(uiImage: photo.image)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: geometry.size.width, height: geometry.size.height)
-                        .clipped()
-                        .ignoresSafeArea(.all, edges: .all)
+            VStack(spacing: 0) {
+                // Top Half - Photo Section
+                ZStack {
+                    if let photo = appState.currentPhoto {
+                        Image(uiImage: photo.image)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(
+                                width: geometry.size.width,
+                                height: geometry.size.height * 0.5
+                            )
+                            .clipped()
+                    }
+                    
+                    // Photo Overlay Controls
+                    VStack {
+                        photoOverlayControls(geometry: geometry)
+                        Spacer()
+                    }
                 }
+                .frame(height: geometry.size.height * 0.5)
+                .ignoresSafeArea(.top)
                 
-                // Photo Overlay Controls
-                VStack {
-                    photoOverlayControls(geometry: geometry)
-                    Spacer()
-                }
-                
-                // Bottom Sheet
-                VStack {
-                    Spacer()
-                    bottomSheet(geometry: geometry)
-                }
+                // Bottom Half - White Sheet
+                bottomSheet(geometry: geometry)
+                    .frame(height: geometry.size.height * 0.5)
             }
         }
         .navigationBarHidden(true)
@@ -177,12 +181,12 @@ struct RecordingView: View {
                 
                 Spacer(minLength: 20)
                 
-                // Timer close to button
+                // Timer close to button - smaller like original
                 Text(formatDuration(appState.currentRecordingDuration))
-                    .font(.largeTitle)
+                    .font(.title)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
-                    .padding(.bottom, 16)
+                    .padding(.bottom, 12)
                 
                 // Animated Stop button
                 Button(action: stopRecording) {
@@ -231,7 +235,6 @@ struct RecordingView: View {
                     .shadow(color: .black.opacity(0.1), radius: 20, x: 0, y: -5)
             )
         }
-        .frame(height: max(0, geometry.size.height * 0.5))
     }
     
     // MARK: - Recording Controls
