@@ -19,28 +19,27 @@ struct RecordingView: View {
     private let maxRecordingDuration: TimeInterval = 60.0
     
     var body: some View {
-        ZStack {
-            // Single unified white background
-            Color(.systemBackground)
-                .ignoresSafeArea(.all)
-            
-            GeometryReader { geometry in
-                ZStack(alignment: .top) {
-                    // Full-screen photo background
-                    if let photo = appState.currentPhoto {
-                        Image(uiImage: photo.image)
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: geometry.size.width, height: geometry.size.height)
-                            .clipped()
-                    }
+        GeometryReader { geometry in
+            ZStack(alignment: .top) {
+                // Full-screen immersive photo background
+                if let photo = appState.currentPhoto {
+                    Image(uiImage: photo.image)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)  // Maintain natural proportions
+                        .frame(width: geometry.size.width, height: geometry.size.height)
+                        .clipped()
+                        .ignoresSafeArea(.all)  // True immersive - cover status bar
+                }
+                
+                // Fallback background for areas not covered by photo
+                Color(.systemBackground)
+                    .ignoresSafeArea(.all)
                     
-                    // Photo overlay controls positioned at top
-                    VStack {
-                        photoOverlayControls(geometry: geometry)
-                        Spacer()
-                    }
-                    .ignoresSafeArea(.container, edges: .top)
+                // Photo overlay controls positioned at top
+                VStack {
+                    photoOverlayControls(geometry: geometry)
+                    Spacer()
+                }
                     
                     // Bottom sheet positioned naturally from bottom
                     VStack {
