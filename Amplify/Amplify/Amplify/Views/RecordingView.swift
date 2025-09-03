@@ -159,7 +159,7 @@ struct RecordingView: View {
             )
         }
         .padding(.horizontal, 16)
-        .padding(.top, max(0, geometry.safeAreaInsets.top + 20))
+        .padding(.top, max(0, geometry.safeAreaInsets.top + 44))
     }
     
     // MARK: - Bottom Sheet Content
