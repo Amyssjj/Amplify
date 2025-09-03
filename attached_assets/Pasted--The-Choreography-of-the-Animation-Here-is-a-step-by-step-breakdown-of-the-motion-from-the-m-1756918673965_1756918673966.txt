@@ -1,0 +1,36 @@
+### **The Choreography of the Animation**
+
+Here is a step-by-step breakdown of the motion from the moment the user taps the record button:
+
+**Initial State:** A large photo card is centered on the screen. A record button is at the bottom.
+
+**Step 1: The Trigger (0 ms)**
+
+*   **User Action:** User taps the record button.
+*   **Immediate Feedback:**
+    *   **Visual:** The record button visually depresses (scales down to 95% size).
+    *   **Haptics:** A single, crisp, light haptic tap (`UIImpactFeedbackGenerator(style: .light)`). This provides instant confirmation that the tap was registered.
+
+**Step 2: The Expansion and Ascent (0 - 350 ms)**
+
+This is the core of the animation where both elements move in perfect concert.
+
+*   **Photo Card Motion:**
+    *   The card begins to move vertically upwards towards the top of the screen.
+    *   **Simultaneously**, it starts to expand horizontally, its width animating from its initial size towards 100% of the screen width.
+    *   **Corner Radius Transformation:** The card's corner radius will change during the animation. It starts with rounded corners on all four sides. As it expands and moves up, the top-left and top-right corner radii will decrease to 0, making them sharp. The bottom-left and bottom-right radii will remain rounded, creating a clean line where it will meet the bottom sheet.
+
+*   **Bottom Sheet Motion:**
+    *   The bottom sheet begins sliding up from off-screen.
+    *   Its animation speed is perfectly timed with the photo card's movement. The top edge of the bottom sheet should feel like it's "pushing" the bottom edge of the photo card upwards, even though they don't touch.
+
+**Step 3: The Settle (350 - 400 ms)**
+
+This is the final phase that makes the animation feel physical and polished rather than robotic.
+
+*   **The "Docking" Effect:**
+    *   Both the photo card and the bottom sheet will use a "spring" or "damped oscillation" easing curve. This means they will slightly overshoot their final position (by 2-3 pixels) and then gently settle back into their final docked state in the center of the screen.
+*   **Final Haptic Feedback:**
+    *   As both elements "lock" into their final positions, a single, slightly more substantial haptic "thud" occurs (`UIImpactFeedbackGenerator(style: .medium)`). This provides a satisfying sense of completion and confirms that the interface is now ready for the next interaction (recording).
+
+**Final State:** The photo card occupies the full width of the top half of the screen (with sharp top corners). The bottom sheet occupies the bottom half, with the live transcription area and the transformed record button ready to go.
