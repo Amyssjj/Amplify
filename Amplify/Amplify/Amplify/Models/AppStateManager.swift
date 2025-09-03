@@ -65,10 +65,8 @@ class AppStateManager: ObservableObject {
     // MARK: - Public Methods
     
     func transitionToRecording(with photo: PhotoData) {
-        print("📥 DEBUG: AppStateManager.transitionToRecording called with photo")
         currentPhoto = photo
         currentScreen = .recording
-        print("✅ DEBUG: AppState.currentPhoto set, screen = .recording")
     }
     
     func startRecording() {

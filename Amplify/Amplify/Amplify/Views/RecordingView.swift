@@ -26,20 +26,14 @@ struct RecordingView: View {
                     Image(uiImage: photo.image)
                         .resizable()
                         .aspectRatio(contentMode: .fill)  // Fill the space completely
-                        .frame(width: geometry.size.width, height: geometry.size.height * 0.6) // Scale up in top 60%
+                        .frame(width: geometry.size.width, height: geometry.size.height * 0.65) // Extend photo further down
                         .clipped()
-                        .position(x: geometry.size.width / 2, y: geometry.size.height * 0.25) // Position in top half
+                        .position(x: geometry.size.width / 2, y: geometry.size.height * 0.2) // Position higher to eliminate gap
                         .ignoresSafeArea(.all)  // True immersive - cover status bar
-                        .onAppear {
-                            print("🖼️ DEBUG: RecordingView rendering photo successfully")
-                        }
                 } else {
                     // Fallback background when no photo
                     Color(.systemBackground)
                         .ignoresSafeArea(.all)
-                        .onAppear {
-                            print("❌ DEBUG: RecordingView - appState.currentPhoto is NIL")
-                        }
                     
                     // DEBUG: Show when no photo is available - make it very visible
                     VStack {
@@ -59,9 +53,10 @@ struct RecordingView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
                     
-                // Photo overlay controls positioned at top
+                // Photo overlay controls positioned at very top
                 VStack {
                     photoOverlayControls(geometry: geometry)
+                        .padding(.top, 8) // Move controls up near status bar
                     Spacer()
                 }
                     
@@ -75,7 +70,6 @@ struct RecordingView: View {
         }
         .navigationBarHidden(true)
         .onAppear {
-            print("👀 DEBUG: RecordingView.onAppear - currentPhoto = \(appState.currentPhoto != nil ? "EXISTS" : "NIL")")
             setupRecording()
         }
         .onDisappear {
