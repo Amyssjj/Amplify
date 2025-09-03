@@ -99,67 +99,57 @@ struct RecordingView: View {
     // MARK: - Photo Overlay Controls
     
     private func photoOverlayControls(geometry: GeometryProxy) -> some View {
-        HStack {
-            // Back button
-            Button {
-                cancelRecording()
-            } label: {
-                Circle()
-                    .fill(.ultraThinMaterial.opacity(0.8))
-                    .background(
-                        Circle()
-                            .fill(Color.white.opacity(0.3))
-                    )
-                    .overlay(
-                        Circle()
-                            .stroke(Color.white.opacity(0.3), lineWidth: 1)
-                    )
-                    .frame(width: 40, height: 40)
-                    .overlay(
-                        Image(systemName: "arrow.left")
-                            .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(.primary)
-                    )
-            }
-            .scaleEffect(backButtonPressed ? 0.9 : 1.0)
-            .animation(.interpolatingSpring(stiffness: 400, damping: 25), value: backButtonPressed)
-            .accessibilityIdentifier("CancelRecordingButton")
-            
-            Spacer()
-            
-            // REC indicator
-            HStack(spacing: 8) {
-                Circle()
-                    .fill(Color.red)
-                    .frame(width: 8, height: 8)
-                    .scaleEffect(pulseAnimation ? 1.3 : 1.0)
-                    .animation(
-                        .easeInOut(duration: 1.0).repeatForever(autoreverses: true),
-                        value: pulseAnimation
-                    )
+        VStack(spacing: 0) {
+            // This positions the controls exactly where iOS navigation items would be
+            HStack(alignment: .center) {
+                // Back button
+                Button {
+                    cancelRecording()
+                } label: {
+                    Circle()
+                        .fill(.ultraThinMaterial.opacity(0.8))
+                        .frame(width: 40, height: 40)
+                        .overlay(
+                            Image(systemName: "arrow.left")
+                                .font(.system(size: 18, weight: .medium))
+                                .foregroundColor(.primary)
+                        )
+                }
+                .scaleEffect(backButtonPressed ? 0.9 : 1.0)
+                .animation(.interpolatingSpring(stiffness: 400, damping: 25), value: backButtonPressed)
+                .accessibilityIdentifier("CancelRecordingButton")
                 
-                Text("REC")
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundColor(.primary)
+                Spacer()
+                
+                // REC indicator
+                HStack(spacing: 8) {
+                    Circle()
+                        .fill(Color.red)
+                        .frame(width: 8, height: 8)
+                        .scaleEffect(pulseAnimation ? 1.3 : 1.0)
+                        .animation(
+                            .easeInOut(duration: 1.0).repeatForever(autoreverses: true),
+                            value: pulseAnimation
+                        )
+                    
+                    Text("REC")
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(
+                    Capsule()
+                        .fill(.ultraThinMaterial.opacity(0.8))
+                )
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
-            .background(
-                Capsule()
-                    .fill(.ultraThinMaterial.opacity(0.8))
-                    .background(
-                        Capsule()
-                            .fill(Color.white.opacity(0.3))
-                    )
-                    .overlay(
-                        Capsule()
-                            .stroke(Color.white.opacity(0.3), lineWidth: 1)
-                    )
-            )
+            .frame(height: 44) // Standard nav bar height
+            .padding(.horizontal, 16)
+            
+            Spacer() // Pushes controls to top
         }
-        .padding(.horizontal, 16)
-        .padding(.top, max(0, geometry.safeAreaInsets.top + 44))
+        .padding(.top, geometry.safeAreaInsets.top) // Respect safe area only
     }
     
     // MARK: - Bottom Sheet Content
