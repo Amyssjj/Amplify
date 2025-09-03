@@ -128,12 +128,13 @@ struct RecordingView: View {
     private func bottomSheet(geometry: GeometryProxy) -> some View {
         let photoSectionHeight = max(100, geometry.size.height * 0.5)
         let bottomSheetHeight = geometry.size.height - photoSectionHeight
-        let headerHeight: CGFloat = 70 // "Listening..." header space
+        let cornerOffset: CGFloat = 24 // Offset for rounded corners to align perfectly
+        let headerHeight: CGFloat = 50 // Reduced header space for closer alignment
         let controlsHeight: CGFloat = 140 // Timer + button space
         let transcriptHeight = bottomSheetHeight - headerHeight - controlsHeight
         
         return VStack(spacing: 0) {
-                // Fixed height header
+                // Fixed height header - positioned close to photo bottom
                 VStack {
                     Text("Listening...")
                         .font(.title2)
@@ -142,6 +143,7 @@ struct RecordingView: View {
                 }
                 .frame(height: headerHeight)
                 .frame(maxWidth: .infinity)
+                .padding(.top, 12) // Minimal top padding for close alignment
                 
                 // Transcript area with calculated height to fill remaining space
                 ScrollView {
@@ -234,7 +236,7 @@ struct RecordingView: View {
                 .frame(height: controlsHeight)
                 .frame(maxWidth: .infinity)
         }
-        .frame(height: bottomSheetHeight + geometry.safeAreaInsets.bottom)
+        .frame(height: bottomSheetHeight + cornerOffset + geometry.safeAreaInsets.bottom)
         .frame(maxWidth: .infinity)
         .background(
             // White background that extends to screen edge
@@ -252,6 +254,7 @@ struct RecordingView: View {
             )
         )
         .shadow(color: .black.opacity(0.1), radius: 20, x: 0, y: -5)
+        .offset(y: -cornerOffset) // Move up to align "Listening" with photo bottom
     }
     
     // MARK: - Recording Controls
