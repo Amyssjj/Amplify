@@ -60,9 +60,9 @@ struct RecordingView: View {
                     Spacer()
                 }
                     
-                // Bottom sheet positioned naturally from bottom
+                // Bottom sheet positioned with 5px overlap on photo
                 VStack {
-                    Spacer(minLength: geometry.size.height * 0.5) // Natural spacing instead of forced split
+                    Spacer(minLength: geometry.size.height * 0.5 - 5) // 5px overlap on photo
                     bottomSheet(geometry: geometry)
                 }
                 .ignoresSafeArea(.container, edges: .bottom)
