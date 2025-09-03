@@ -126,7 +126,8 @@ struct RecordingView: View {
     // MARK: - Bottom Sheet
     
     private func bottomSheet(geometry: GeometryProxy) -> some View {
-        let bottomSheetHeight = geometry.size.height / 2
+        let photoSectionHeight = max(100, geometry.size.height * 0.5)
+        let bottomSheetHeight = geometry.size.height - photoSectionHeight
         let headerHeight: CGFloat = 70 // "Listening..." header space
         let controlsHeight: CGFloat = 140 // Timer + button space
         let transcriptHeight = bottomSheetHeight - headerHeight - controlsHeight
