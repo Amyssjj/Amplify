@@ -140,23 +140,33 @@ struct RecordingView: View {
                         .font(.title2)
                         .fontWeight(.semibold)
                         .foregroundColor(.primary)
+                        .multilineTextAlignment(.center)
                 }
                 .frame(height: headerHeight)
                 .frame(maxWidth: .infinity)
-                .padding(.top, 12) // Minimal top padding for close alignment
+                .padding(.top, 8) // Minimal top padding for close alignment
                 
-                // Transcript area with calculated height to fill remaining space
+                // Transcript area with 8-line design, text starts in middle
                 ScrollView {
                     ScrollViewReader { proxy in
                         VStack(alignment: .leading, spacing: 0) {
+                            // Create 8-line spacing (4 lines above + content + space below)
+                            let lineHeight: CGFloat = 24
+                            let totalLines: CGFloat = 8
+                            let topSpacing = lineHeight * 3.5 // Start near middle of 8 lines
+                            
+                            // Top spacer to position text in middle of 8-line area
+                            Spacer()
+                                .frame(height: topSpacing)
+                            
                             if currentTranscript.isEmpty {
                                 Text("Start speaking to see your words appear here...")
                                     .font(.body)
                                     .foregroundColor(.secondary)
                                     .italic()
+                                    .lineSpacing(6)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .padding(.horizontal, 24)
-                                    .padding(.top, 20)
                             } else {
                                 Text(currentTranscript + (pulseAnimation ? "│" : "║"))
                                     .font(.body)
@@ -164,10 +174,12 @@ struct RecordingView: View {
                                     .lineSpacing(6)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .padding(.horizontal, 24)
-                                    .padding(.top, 20)
                                     .id("transcript")
                                     .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: pulseAnimation)
                             }
+                            
+                            // Bottom spacer to complete 8-line area
+                            Spacer()
                         }
                         .frame(minHeight: max(0, transcriptHeight - 40)) // Fill available height
                         .onChange(of: currentTranscript) {
@@ -239,10 +251,20 @@ struct RecordingView: View {
         .frame(height: bottomSheetHeight + cornerOffset + geometry.safeAreaInsets.bottom)
         .frame(maxWidth: .infinity)
         .background(
-            // White background that extends to screen edge
-            Rectangle()
-                .fill(Color(.systemBackground))
-                .ignoresSafeArea(.container, edges: .bottom)
+            // White background that fills behind rounded corners to eliminate grey gap
+            ZStack {
+                // Extended white background to fill gap behind rounded corners
+                Rectangle()
+                    .fill(Color(.systemBackground))
+                    .ignoresSafeArea(.container, edges: .bottom)
+                    .offset(y: -cornerOffset) // Extend upward to fill gap
+                
+                // Additional white fill at the boundary
+                Rectangle()
+                    .fill(Color(.systemBackground))
+                    .frame(height: cornerOffset * 2)
+                    .offset(y: -cornerOffset)
+            }
         )
         .clipShape(
             // Only round top corners, extend straight to bottom edge
