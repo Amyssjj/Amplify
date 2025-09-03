@@ -148,35 +148,14 @@ struct RecordingView: View {
                                     .foregroundColor(.secondary)
                                     .italic()
                             } else {
-                                // Text with properly following cursor
-                                ZStack(alignment: .topLeading) {
-                                    Text(currentTranscript + " ")
-                                        .font(.body)
-                                        .foregroundColor(.primary)
-                                        .lineSpacing(4)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .id("transcript")
-                                    
-                                    // Cursor positioned at text end using geometric reader
-                                    HStack(spacing: 0) {
-                                        Text(currentTranscript)
-                                            .font(.body)
-                                            .lineSpacing(4)
-                                            .opacity(0) // Invisible text for positioning
-                                        
-                                        Rectangle()
-                                            .fill(Color.blue)
-                                            .frame(width: 2, height: 20)
-                                            .opacity(pulseAnimation ? 1.0 : 0.3)
-                                            .animation(
-                                                .easeInOut(duration: 0.8).repeatForever(autoreverses: true),
-                                                value: pulseAnimation
-                                            )
-                                        
-                                        Spacer()
-                                    }
+                                // Text with simple inline cursor - works for multiline
+                                Text(currentTranscript + (pulseAnimation ? "│" : "║"))
+                                    .font(.body)
+                                    .foregroundColor(.primary)
+                                    .lineSpacing(4)
                                     .frame(maxWidth: .infinity, alignment: .leading)
-                                }
+                                    .id("transcript")
+                                    .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: pulseAnimation)
                             }
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -193,14 +172,30 @@ struct RecordingView: View {
                 
                 Spacer(minLength: 20)
                 
-                // Timer very close to button - matching design exactly  
-                Text(formatDuration(appState.currentRecordingDuration))
-                    .font(.largeTitle)
-                    .fontWeight(.medium)
-                    .foregroundColor(.primary)
-                    .padding(.bottom, 4)
-                
-                // Animated Stop button
+                // Recording button with timer above (matching RecordButton.tsx)
+                VStack(spacing: 16) {
+                    // Timer in glass pill above button - matching React design
+                    Text(formatDuration(appState.currentRecordingDuration))
+                        .font(.headline)
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(
+                            Capsule()
+                                .fill(.ultraThinMaterial.opacity(0.8))
+                                .background(
+                                    Capsule()
+                                        .fill(Color.white.opacity(0.3))
+                                )
+                                .overlay(
+                                    Capsule()
+                                        .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                                )
+                        )
+                        .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 4)
+                    
+                    // Animated Stop button
                 Button(action: stopRecording) {
                     ZStack {
                         // Outer pulsing ring
@@ -234,10 +229,11 @@ struct RecordingView: View {
                 .accessibilityIdentifier("StopRecordingButton")
                 .accessibilityLabel("Stop recording")
                 
-                Text("Tap to stop recording")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .padding(.top, 8)
+                    Text("Tap to stop recording")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .padding(.top, 8)
+                }
                 
                 Spacer(minLength: 32)
             }
