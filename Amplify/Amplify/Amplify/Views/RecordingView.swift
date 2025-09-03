@@ -148,15 +148,22 @@ struct RecordingView: View {
                                     .foregroundColor(.secondary)
                                     .italic()
                             } else {
-                                VStack(alignment: .leading, spacing: 0) {
-                                    HStack(alignment: .top, spacing: 2) {
+                                // Text with properly following cursor
+                                ZStack(alignment: .topLeading) {
+                                    Text(currentTranscript + " ")
+                                        .font(.body)
+                                        .foregroundColor(.primary)
+                                        .lineSpacing(4)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .id("transcript")
+                                    
+                                    // Cursor positioned at text end using geometric reader
+                                    HStack(spacing: 0) {
                                         Text(currentTranscript)
                                             .font(.body)
-                                            .foregroundColor(.primary)
                                             .lineSpacing(4)
-                                            .fixedSize(horizontal: false, vertical: true)
+                                            .opacity(0) // Invisible text for positioning
                                         
-                                        // Blinking cursor - positioned at text end
                                         Rectangle()
                                             .fill(Color.blue)
                                             .frame(width: 2, height: 20)
@@ -168,7 +175,7 @@ struct RecordingView: View {
                                         
                                         Spacer()
                                     }
-                                    .id("transcript")
+                                    .frame(maxWidth: .infinity, alignment: .leading)
                                 }
                             }
                         }
@@ -186,12 +193,12 @@ struct RecordingView: View {
                 
                 Spacer(minLength: 20)
                 
-                // Timer close to button - small font matching design
+                // Timer very close to button - matching design exactly  
                 Text(formatDuration(appState.currentRecordingDuration))
-                    .font(.title2)
-                    .fontWeight(.semibold)
+                    .font(.largeTitle)
+                    .fontWeight(.medium)
                     .foregroundColor(.primary)
-                    .padding(.bottom, 8)
+                    .padding(.bottom, 4)
                 
                 // Animated Stop button
                 Button(action: stopRecording) {
