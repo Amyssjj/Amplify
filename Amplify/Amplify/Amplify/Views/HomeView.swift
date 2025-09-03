@@ -96,7 +96,7 @@ struct HomeView: View {
             .gesture(
                 DragGesture()
                     .onEnded { value in
-                        if abs(value.translation.x) > 100 {
+                        if abs(value.translation.width) > 100 {
                             Task {
                                 await refreshPhoto()
                             }

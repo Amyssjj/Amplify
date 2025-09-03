@@ -216,12 +216,12 @@ class AIEnhancementService: ObservableObject {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.timeoutInterval = requestTimeout
         
-        let requestBody = [
+        let requestBody: [String: Any] = [
             "model": "gpt-4",
             "messages": [
                 ["role": "system", "content": "You are an expert communication coach specializing in storytelling improvement."],
                 ["role": "user", "content": prompt]
-            ],
+            ] as [[String: String]],
             "temperature": 0.7,
             "max_tokens": 2000
         ]
