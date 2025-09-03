@@ -23,26 +23,28 @@ struct HomeView: View {
                 backgroundAnimations
                 
                 VStack(spacing: 0) {
-                    // Header - always visible
+                    // Header - left aligned like React
                     headerView
-                        .padding(.top, 16)
-                        .padding(.bottom, 8)
+                        .padding(.top, 32) 
+                        .padding(.bottom, 16)
                     
-                    // Main scrollable content area
-                    ScrollView(.vertical, showsIndicators: false) {
-                        VStack(spacing: 16) {
-                            // Photo prompt section  
-                            photoPromptSection(geometry: geometry)
-                            
-                            // Dots indicator
-                            dotsIndicator
-                        }
-                        .padding(.vertical, 20)
+                    // Main content area - matching React layout
+                    VStack {
+                        Spacer(minLength: 40)
+                        
+                        // Photo prompt section  
+                        photoPromptSection(geometry: geometry)
+                        
+                        // Dots indicator
+                        dotsIndicator
+                            .padding(.top, 16)
+                        
+                        Spacer(minLength: 80)
                     }
                     
                     // Record button section at bottom
                     recordButtonSection
-                        .padding(.bottom, 20)
+                        .padding(.bottom, 48)
                 }
             }
         }
@@ -56,8 +58,8 @@ struct HomeView: View {
     // MARK: - Header View
     
     private var headerView: some View {
-        VStack(spacing: 8) {
-            // Gradient text matching React version
+        VStack(alignment: .leading, spacing: 8) {
+            // Gradient text matching React version - left aligned
             Text("Amplify")
                 .font(.system(size: 30, weight: .semibold))
                 .foregroundStyle(
@@ -72,6 +74,7 @@ struct HomeView: View {
                 .font(.subheadline)
                 .foregroundColor(Color(.systemGray))
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 24)
     }
     
