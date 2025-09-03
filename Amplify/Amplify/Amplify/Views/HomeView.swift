@@ -201,26 +201,27 @@ struct HomeView: View {
     private func startRecording() {
         guard let photo = currentPhoto else { return }
         
-        // Step 1: Immediate visual and haptic feedback (0ms)
+        // Immediate visual feedback
         recordButtonPressed = true
         
-        // Light haptic for immediate confirmation
+        // Immediate haptic feedback
         let lightImpact = UIImpactFeedbackGenerator(style: .light)
         lightImpact.impactOccurred()
         
-        // Brief delay for button press animation, then start transition
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-            recordButtonPressed = false // Reset button state
-            
-            withAnimation(.interactiveSpring(response: 0.4, dampingFraction: 0.8, blendDuration: 0)) {
-                appState.transitionToRecording(with: photo)
-            }
-            
-            // Medium haptic at the end of animation (400ms later) for completion
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-                let mediumImpact = UIImpactFeedbackGenerator(style: .medium)
-                mediumImpact.impactOccurred()
-            }
+        // Fast, smooth transition - no delays
+        withAnimation(.easeOut(duration: 0.25)) {
+            appState.transitionToRecording(with: photo)
+        }
+        
+        // Reset button state quickly
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            recordButtonPressed = false
+        }
+        
+        // Completion haptic at end of fast animation
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+            let mediumImpact = UIImpactFeedbackGenerator(style: .medium)
+            mediumImpact.impactOccurred()
         }
     }
     

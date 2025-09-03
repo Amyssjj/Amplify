@@ -63,7 +63,7 @@ struct ContentView: View {
                     insertion: customTransition(for: appState.currentScreen),
                     removal: customTransition(for: appState.currentScreen)
                 ))
-                .animation(.interactiveSpring(response: 0.4, dampingFraction: 0.8, blendDuration: 0), value: appState.currentScreen)
+                .animation(.easeOut(duration: 0.25), value: appState.currentScreen)
             }
         }
         .alert(
@@ -121,8 +121,8 @@ struct RecordingTransitionModifier: ViewModifier {
     
     func body(content: Content) -> some View {
         content
-            .scaleEffect(phase == .start ? 0.8 : 1.0)
-            .offset(y: phase == .start ? UIScreen.main.bounds.height * 0.5 : 0)
+            .scaleEffect(phase == .start ? 0.95 : 1.0)
+            .offset(y: phase == .start ? 50 : 0)
             .opacity(phase == .start ? 0 : 1)
     }
 }
