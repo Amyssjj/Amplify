@@ -208,8 +208,8 @@ struct HomeView: View {
         let lightImpact = UIImpactFeedbackGenerator(style: .light)
         lightImpact.impactOccurred()
         
-        // Fast, smooth transition - no delays
-        withAnimation(.easeOut(duration: 0.25)) {
+        // Ultra-fast, smooth transition
+        withAnimation(.easeOut(duration: 0.15)) {
             appState.transitionToRecording(with: photo)
         }
         
@@ -219,7 +219,7 @@ struct HomeView: View {
         }
         
         // Completion haptic at end of fast animation
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
             let mediumImpact = UIImpactFeedbackGenerator(style: .medium)
             mediumImpact.impactOccurred()
         }

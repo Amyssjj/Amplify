@@ -172,9 +172,11 @@ struct ProcessingView: View {
         
         // Stop timer when processing is complete - check periodically
         Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { checkTimer in
-            if aiService.processingProgress >= 1.0 {
-                timer.invalidate()
-                checkTimer.invalidate()
+            Task { @MainActor in
+                if aiService.processingProgress >= 1.0 {
+                    timer.invalidate()
+                    checkTimer.invalidate()
+                }
             }
         }
     }
