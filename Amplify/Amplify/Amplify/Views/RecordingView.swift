@@ -29,6 +29,12 @@ struct RecordingView: View {
                         .frame(width: geometry.size.width, height: geometry.size.height)
                         .clipped()
                         .ignoresSafeArea(.all)  // True immersive - cover status bar
+                } else {
+                    // DEBUG: Show when no photo is available
+                    Text("No photo available\nappState.currentPhoto is nil")
+                        .foregroundColor(.red)
+                        .multilineTextAlignment(.center)
+                        .padding()
                 }
                 
                 // Fallback background for areas not covered by photo
@@ -173,7 +179,6 @@ struct RecordingView: View {
                         VStack(alignment: .leading, spacing: 0) {
                             // Create 8-line spacing (4 lines above + content + space below)
                             let lineHeight: CGFloat = 24
-                            let totalLines: CGFloat = 8
                             let topSpacing = lineHeight * 3.5 // Start near middle of 8 lines
                             
                             // Top spacer to position text in middle of 8-line area
