@@ -126,40 +126,48 @@ struct RecordingView: View {
     // MARK: - Bottom Sheet
     
     private func bottomSheet(geometry: GeometryProxy) -> some View {
-        VStack(spacing: 0) {
-            // White rounded sheet - exactly half screen height
+        let bottomSheetHeight = geometry.size.height / 2
+        let headerHeight: CGFloat = 70 // "Listening..." header space
+        let controlsHeight: CGFloat = 140 // Timer + button space
+        let transcriptHeight = bottomSheetHeight - headerHeight - controlsHeight
+        
+        return VStack(spacing: 0) {
             VStack(spacing: 0) {
-                // "Listening..." header
-                Text("Listening...")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.primary)
-                    .padding(.top, 24)
-                    .padding(.bottom, 16)
+                // Fixed height header
+                VStack {
+                    Text("Listening...")
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.primary)
+                }
+                .frame(height: headerHeight)
+                .frame(maxWidth: .infinity)
                 
-                // Transcript area - fills most of the bottom sheet space
+                // Transcript area with calculated height to fill remaining space
                 ScrollView {
                     ScrollViewReader { proxy in
-                        VStack(alignment: .leading, spacing: 12) {
+                        VStack(alignment: .leading, spacing: 0) {
                             if currentTranscript.isEmpty {
                                 Text("Start speaking to see your words appear here...")
                                     .font(.body)
                                     .foregroundColor(.secondary)
                                     .italic()
                                     .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(.horizontal, 24)
+                                    .padding(.top, 20)
                             } else {
-                                // Text with simple inline cursor - works for multiline
                                 Text(currentTranscript + (pulseAnimation ? "│" : "║"))
                                     .font(.body)
                                     .foregroundColor(.primary)
                                     .lineSpacing(6)
                                     .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(.horizontal, 24)
+                                    .padding(.top, 20)
                                     .id("transcript")
                                     .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: pulseAnimation)
                             }
                         }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 24)
+                        .frame(minHeight: max(0, transcriptHeight - 40)) // Fill available height
                         .onChange(of: currentTranscript) {
                             withAnimation(.easeOut(duration: 0.3)) {
                                 proxy.scrollTo("transcript", anchor: .bottom)
@@ -167,12 +175,11 @@ struct RecordingView: View {
                         }
                     }
                 }
-                .frame(maxWidth: .infinity)
-                .layoutPriority(1) // Give transcription area priority for space
+                .frame(height: transcriptHeight)
                 
-                // Bottom controls section
-                VStack(spacing: 12) {
-                    // Timer in glass pill
+                // Fixed height bottom controls
+                VStack(spacing: 16) {
+                    // Timer pill
                     Text(formatDuration(appState.currentRecordingDuration))
                         .font(.headline)
                         .fontWeight(.medium)
@@ -193,33 +200,30 @@ struct RecordingView: View {
                         )
                         .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 4)
                     
-                    // Recording stop button
+                    // Recording button
                     Button(action: stopRecording) {
                         ZStack {
-                            // Outer pulsing ring
                             Circle()
                                 .fill(Color.red.opacity(0.3))
-                                .frame(width: 100, height: 100)
-                                .scaleEffect(pulseAnimation ? 1.2 : 1.0)
+                                .frame(width: 90, height: 90)
+                                .scaleEffect(pulseAnimation ? 1.1 : 1.0)
                                 .opacity(pulseAnimation ? 0.0 : 0.3)
                                 .animation(
                                     .easeInOut(duration: 1.5).repeatForever(autoreverses: false),
                                     value: pulseAnimation
                                 )
                             
-                            // Main button
                             Circle()
                                 .fill(Color.red)
                                 .frame(width: 70, height: 70)
                                 .shadow(color: .red.opacity(0.4), radius: 15, x: 0, y: 8)
                             
-                            // Stop icon
                             RoundedRectangle(cornerRadius: 3)
                                 .fill(Color.white)
                                 .frame(width: 14, height: 14)
                         }
                     }
-                    .scaleEffect(pulseAnimation ? 1.05 : 1.0)
+                    .scaleEffect(pulseAnimation ? 1.02 : 1.0)
                     .animation(
                         .easeInOut(duration: 1.0).repeatForever(autoreverses: true),
                         value: pulseAnimation
@@ -227,10 +231,10 @@ struct RecordingView: View {
                     .accessibilityIdentifier("StopRecordingButton")
                     .accessibilityLabel("Stop recording")
                 }
-                .padding(.vertical, 20)
-                .padding(.bottom, max(0, geometry.safeAreaInsets.bottom))
+                .frame(height: controlsHeight)
+                .frame(maxWidth: .infinity)
             }
-            .frame(height: geometry.size.height / 2) // Exactly half screen height
+            .frame(height: bottomSheetHeight)
             .background(
                 RoundedRectangle(cornerRadius: 24)
                     .fill(Color(.systemBackground))
