@@ -92,16 +92,6 @@ struct ContentView: View {
                     .combined(with: .move(edge: .top))
                     .combined(with: .opacity)
             )
-        case .processing:
-            return AnyTransition.asymmetric(
-                insertion: .opacity.combined(with: .scale(scale: 0.9, anchor: .center)),
-                removal: .opacity.combined(with: .scale(scale: 1.1, anchor: .center))
-            )
-        case .results:
-            return AnyTransition.asymmetric(
-                insertion: .move(edge: .trailing).combined(with: .opacity),
-                removal: .move(edge: .leading).combined(with: .opacity)
-            )
         case .home:
             // Smooth return to home with spring physics
             return AnyTransition.asymmetric(
@@ -112,10 +102,15 @@ struct ContentView: View {
                     .combined(with: .move(edge: .bottom))
                     .combined(with: .opacity)
             )
-        default:
+        case .processing:
             return AnyTransition.asymmetric(
-                insertion: .opacity.combined(with: .scale(scale: 0.95, anchor: .center)),
-                removal: .opacity.combined(with: .scale(scale: 1.05, anchor: .center))
+                insertion: .opacity.combined(with: .scale(scale: 0.9, anchor: .center)),
+                removal: .opacity.combined(with: .scale(scale: 1.1, anchor: .center))
+            )
+        case .results:
+            return AnyTransition.asymmetric(
+                insertion: .move(edge: .trailing).combined(with: .opacity),
+                removal: .move(edge: .leading).combined(with: .opacity)
             )
         }
     }

@@ -367,8 +367,13 @@ struct RecordingView: View {
     }
     
     @State private var backButtonPressed = false
+    @State private var isTransitioning = false
     
     private func cancelRecording() {
+        guard !isTransitioning else { return } // Prevent double-tap issues
+        
+        isTransitioning = true
+        
         // Immediate visual feedback
         backButtonPressed = true
         
@@ -380,14 +385,15 @@ struct RecordingView: View {
         speechService.stopLiveRecognition()
         audioService.cancelRecording()
         
-        // Smooth spring transition back to home
+        // Smooth spring transition back to home - consistent every time
         withAnimation(.interpolatingSpring(stiffness: 300, damping: 30)) {
             appState.returnToHome()
         }
         
-        // Reset button state
+        // Reset states
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             backButtonPressed = false
+            isTransitioning = false
         }
     }
     

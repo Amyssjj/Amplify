@@ -197,9 +197,13 @@ struct HomeView: View {
     // MARK: - Actions
     
     @State private var recordButtonPressed = false
+    @State private var isTransitioning = false
     
     private func startRecording() {
         guard let photo = currentPhoto else { return }
+        guard !isTransitioning else { return } // Prevent double-tap issues
+        
+        isTransitioning = true
         
         // Immediate visual feedback
         recordButtonPressed = true
@@ -208,14 +212,15 @@ struct HomeView: View {
         let lightImpact = UIImpactFeedbackGenerator(style: .light)
         lightImpact.impactOccurred()
         
-        // Ultra-smooth transition with spring physics
+        // Ultra-smooth transition with spring physics - consistent every time
         withAnimation(.interpolatingSpring(stiffness: 300, damping: 30)) {
             appState.transitionToRecording(with: photo)
         }
         
-        // Reset button state quickly
+        // Reset states quickly
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             recordButtonPressed = false
+            isTransitioning = false
         }
         
         // Completion haptic at end of fast animation
