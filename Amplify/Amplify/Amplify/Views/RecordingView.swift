@@ -41,7 +41,7 @@ struct RecordingView: View {
                     }
                 }
                 .frame(height: max(100, geometry.size.height * 0.5))
-                .ignoresSafeArea(.top)
+                .ignoresSafeArea(.container, edges: .top)
                 
                 // Bottom Half - White Sheet
                 bottomSheet(geometry: geometry)

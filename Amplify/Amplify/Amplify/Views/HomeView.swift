@@ -103,15 +103,15 @@ struct HomeView: View {
                 if isLoadingPhoto {
                     ProgressView()
                         .scaleEffect(1.5)
-                        .frame(height: min(geometry.size.height * 0.35, 280))
+                        .frame(height: max(200, min(geometry.size.height * 0.35, 280)))
                 } else if let photo = currentPhoto {
                     VStack(spacing: 0) {
                         Image(uiImage: photo.image)
                             .resizable()
                             .aspectRatio(contentMode: .fill)
                             .frame(
-                                maxWidth: geometry.size.width - 48,
-                                maxHeight: min(geometry.size.height * 0.35, 280)
+                                maxWidth: max(200, geometry.size.width - 48),
+                                maxHeight: max(200, min(geometry.size.height * 0.35, 280))
                             )
                             .clipShape(RoundedRectangle(cornerRadius: 24))
                             .overlay(
@@ -138,8 +138,8 @@ struct HomeView: View {
                 }
             }
             .frame(
-                maxWidth: geometry.size.width - 48,
-                maxHeight: min(geometry.size.height * 0.35, 280)
+                maxWidth: max(200, geometry.size.width - 48),
+                maxHeight: max(200, min(geometry.size.height * 0.35, 280))
             )
             .padding(.horizontal, 24)
             .gesture(
