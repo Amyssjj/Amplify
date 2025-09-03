@@ -27,7 +27,10 @@ struct RecordingView: View {
                         Image(uiImage: photo.image)
                             .resizable()
                             .aspectRatio(contentMode: .fill)
-                            .frame(height: geometry.size.height * 0.6)
+                            .frame(
+                                width: geometry.size.width,
+                                height: geometry.size.height * 0.6
+                            )
                             .clipped()
                     }
                     Spacer()
@@ -116,8 +119,8 @@ struct RecordingView: View {
                     )
             )
         }
-        .padding(.horizontal, 24)
-        .padding(.top, 16)
+        .padding(.horizontal, 16)
+        .padding(.top, geometry.safeAreaInsets.top + 8)
     }
     
     // MARK: - Bottom Sheet
@@ -224,7 +227,7 @@ struct RecordingView: View {
                     .shadow(color: .black.opacity(0.1), radius: 20, x: 0, y: -5)
             )
         }
-        .frame(height: geometry.size.height * 0.55)
+        .frame(height: geometry.size.height * 0.5)
     }
     
     // MARK: - Recording Controls
