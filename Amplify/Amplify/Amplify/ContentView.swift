@@ -59,7 +59,11 @@ struct ContentView: View {
                         )
                     }
                 }
-                .animation(.easeInOut(duration: 0.5), value: appState.currentScreen)
+                .transition(.asymmetric(
+                    insertion: customTransition(for: appState.currentScreen),
+                    removal: customTransition(for: appState.currentScreen)
+                ))
+                .animation(.interactiveSpring(response: 0.4, dampingFraction: 0.8, blendDuration: 0), value: appState.currentScreen)
             }
         }
         .alert(
@@ -72,6 +76,54 @@ struct ContentView: View {
         } message: {
             Text(appState.currentError?.message ?? "An error occurred")
         }
+    }
+    
+    // MARK: - Custom Transitions
+    
+    private func customTransition(for screen: AppScreen) -> AnyTransition {
+        switch screen {
+        case .recording:
+            // Sophisticated photo expansion and bottom sheet choreography
+            return AnyTransition.asymmetric(
+                insertion: .modifier(
+                    active: RecordingTransitionModifier(phase: .start),
+                    identity: RecordingTransitionModifier(phase: .end)
+                ),
+                removal: .opacity.combined(with: .scale(scale: 0.9, anchor: .center))
+            )
+        case .processing:
+            return AnyTransition.asymmetric(
+                insertion: .opacity.combined(with: .scale(scale: 0.9, anchor: .center)),
+                removal: .opacity.combined(with: .scale(scale: 1.1, anchor: .center))
+            )
+        case .results:
+            return AnyTransition.asymmetric(
+                insertion: .move(edge: .trailing).combined(with: .opacity),
+                removal: .move(edge: .leading).combined(with: .opacity)
+            )
+        default:
+            return AnyTransition.asymmetric(
+                insertion: .opacity.combined(with: .scale(scale: 0.95, anchor: .center)),
+                removal: .opacity.combined(with: .scale(scale: 1.05, anchor: .center))
+            )
+        }
+    }
+}
+
+// MARK: - Custom Recording Transition
+
+struct RecordingTransitionModifier: ViewModifier {
+    let phase: TransitionPhase
+    
+    enum TransitionPhase {
+        case start, end
+    }
+    
+    func body(content: Content) -> some View {
+        content
+            .scaleEffect(phase == .start ? 0.8 : 1.0)
+            .offset(y: phase == .start ? UIScreen.main.bounds.height * 0.5 : 0)
+            .opacity(phase == .start ? 0 : 1)
     }
 }
 

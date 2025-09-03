@@ -184,8 +184,9 @@ struct HomeView: View {
             }
             .disabled(!appState.canRecord)
             .opacity(appState.canRecord ? 1.0 : 0.6)
-            .scaleEffect(appState.canRecord ? 1.0 : 0.95)
-            .animation(.easeInOut(duration: 0.2), value: appState.canRecord)
+            .scaleEffect(recordButtonPressed ? 0.95 : (appState.canRecord ? 1.0 : 0.95))
+            .animation(.easeInOut(duration: recordButtonPressed ? 0.05 : 0.2), value: appState.canRecord)
+            .animation(.easeInOut(duration: 0.05), value: recordButtonPressed)
             .accessibilityIdentifier("RecordStoryButton")
             .accessibilityLabel("Record your story")
             .accessibilityHint("Tap to start recording your story about this photo")
@@ -195,14 +196,32 @@ struct HomeView: View {
     
     // MARK: - Actions
     
+    @State private var recordButtonPressed = false
+    
     private func startRecording() {
         guard let photo = currentPhoto else { return }
         
-        // Haptic feedback
-        let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
-        impactFeedback.impactOccurred()
+        // Step 1: Immediate visual and haptic feedback (0ms)
+        recordButtonPressed = true
         
-        appState.transitionToRecording(with: photo)
+        // Light haptic for immediate confirmation
+        let lightImpact = UIImpactFeedbackGenerator(style: .light)
+        lightImpact.impactOccurred()
+        
+        // Brief delay for button press animation, then start transition
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            recordButtonPressed = false // Reset button state
+            
+            withAnimation(.interactiveSpring(response: 0.4, dampingFraction: 0.8, blendDuration: 0)) {
+                appState.transitionToRecording(with: photo)
+            }
+            
+            // Medium haptic at the end of animation (400ms later) for completion
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                let mediumImpact = UIImpactFeedbackGenerator(style: .medium)
+                mediumImpact.impactOccurred()
+            }
+        }
     }
     
     private func loadInitialPhoto() async {
