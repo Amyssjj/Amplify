@@ -167,7 +167,7 @@ struct RecordingView: View {
                         }
                     }
                 }
-                .frame(minHeight: max(50, min(100, geometry.size.height * 0.2)), maxHeight: max(100, min(150, geometry.size.height * 0.3)))
+                .frame(height: 160) // Fixed height for exactly 7 lines of text
                 .padding(.horizontal, 0)
                 
                 Spacer(minLength: 60)
