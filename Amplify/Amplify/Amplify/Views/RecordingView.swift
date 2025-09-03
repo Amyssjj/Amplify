@@ -28,8 +28,8 @@ struct RecordingView: View {
                             .resizable()
                             .aspectRatio(contentMode: .fill)
                             .frame(
-                                width: geometry.size.width,
-                                height: geometry.size.height * 0.6
+                                width: max(0, geometry.size.width),
+                                height: max(0, geometry.size.height * 0.6)
                             )
                             .clipped()
                     }
@@ -227,7 +227,7 @@ struct RecordingView: View {
                     .shadow(color: .black.opacity(0.1), radius: 20, x: 0, y: -5)
             )
         }
-        .frame(height: geometry.size.height * 0.5)
+        .frame(height: max(0, geometry.size.height * 0.5))
     }
     
     // MARK: - Recording Controls

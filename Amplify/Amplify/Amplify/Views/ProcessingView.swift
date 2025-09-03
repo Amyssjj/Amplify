@@ -162,21 +162,19 @@ struct ProcessingView: View {
         }
         
         // Phase animation (message cycling)
-        Timer.scheduledTimer(withTimeInterval: 1.5, repeats: true) { [weak self] timer in
+        let timer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: true) { _ in
             Task { @MainActor in
-                guard let self = self else {
-                    timer.invalidate()
-                    return
-                }
-                
                 withAnimation(.easeInOut(duration: 0.5)) {
-                    self.animationPhase = (self.animationPhase + 1) % self.animationMessages.count
+                    animationPhase = (animationPhase + 1) % animationMessages.count
                 }
-                
-                // Stop timer when processing is complete
-                if self.aiService.processingProgress >= 1.0 {
-                    timer.invalidate()
-                }
+            }
+        }
+        
+        // Stop timer when processing is complete - check periodically
+        Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { checkTimer in
+            if aiService.processingProgress >= 1.0 {
+                timer.invalidate()
+                checkTimer.invalidate()
             }
         }
     }

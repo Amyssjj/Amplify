@@ -117,7 +117,7 @@ class SpeechRecognitionService: ObservableObject {
         return await withCheckedContinuation { continuation in
             recognizer.recognitionTask(with: request) { result, error in
                 DispatchQueue.main.async {
-                    if let error = error {
+                    if error != nil {
                         continuation.resume(returning: .failure(.recognitionFailed))
                     } else if let result = result, result.isFinal {
                         continuation.resume(returning: .success(result.bestTranscription.formattedString))
