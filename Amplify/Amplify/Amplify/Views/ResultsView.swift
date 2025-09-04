@@ -356,57 +356,66 @@ struct ResultsView: View {
     
     private var insightsCard: some View {
         VStack(alignment: .leading, spacing: 16) {
-            // Header with icon and title - exactly matching React
-            HStack(spacing: 8) {
-                Image(systemName: "lightbulb")
-                    .font(.title3)
-                    .foregroundColor(.gray)
-                
-                Text("Sharp Insights")
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(titleGradient)
-                
-                Spacer()
-            }
-            
-            // Insights content - scrollable with improved styling
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    if let recording = appState.currentRecording {
-                        ForEach(Array(recording.insights.enumerated()), id: \.element.id) { index, insight in
-                            VStack(alignment: .leading, spacing: 8) {
-                                HStack {
-                                    Text(insight.emoji)
-                                        .font(.title2)
-                                    Text(insight.title)
-                                        .font(.subheadline)
-                                        .fontWeight(.semibold)
-                                        .foregroundColor(.primary)
-                                    Spacer()
-                                }
-                                
-                                Text(insight.description)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                    .lineSpacing(2)
-                            }
-                            
-                            if index < recording.insights.count - 1 {
-                                Divider()
-                                    .opacity(0.3)
-                            }
-                        }
-                    }
-                }
-                .padding(.bottom, 16)
-            }
-            .frame(maxHeight: .infinity)
+            insightsHeaderView
+            insightsContentView
         }
         .padding(20)
         .background(cardBackground)
         .onTapGesture {
             showingInsightModal = true
+        }
+    }
+    
+    private var insightsHeaderView: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "lightbulb")
+                .font(.title3)
+                .foregroundColor(.gray)
+            
+            Text("Sharp Insights")
+                .font(.headline)
+                .fontWeight(.semibold)
+                .foregroundStyle(titleGradient)
+            
+            Spacer()
+        }
+    }
+    
+    private var insightsContentView: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                if let recording = appState.currentRecording {
+                    ForEach(Array(recording.insights.enumerated()), id: \.element.id) { index, insight in
+                        insightRowView(insight: insight, index: index, totalCount: recording.insights.count)
+                    }
+                }
+            }
+            .padding(.bottom, 16)
+        }
+        .frame(maxHeight: .infinity)
+    }
+    
+    private func insightRowView(insight: AIInsight, index: Int, totalCount: Int) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text(insight.emoji)
+                    .font(.title2)
+                Text(insight.title)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.primary)
+                Spacer()
+            }
+            
+            Text(insight.description)
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .lineSpacing(2)
+            
+            if index < totalCount - 1 {
+                Divider()
+                    .opacity(0.3)
+            }
         }
     }
     
