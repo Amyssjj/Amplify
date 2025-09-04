@@ -251,10 +251,8 @@ struct ResultsView: View {
             .frame(height: 4)
             // TODO: Add seek functionality later
             .onTapGesture {
-                Task { @MainActor in
-                    // Simple tap to seek to middle for now
-                    currentPlayTime = duration * 0.5
-                }
+                // Simple tap to seek to middle for now
+                currentPlayTime = duration * 0.5
             }
             
             // Controls
@@ -433,18 +431,16 @@ struct ResultsView: View {
         // TODO: Implement actual audio playback with time updates
         if isPlaying {
             // Simulate playback progress using Task for concurrency safety
-            Task {
-                while await MainActor.run({ isPlaying }), let recording = await MainActor.run({ appState.currentRecording }) {
+            Task { @MainActor in
+                while isPlaying, let recording = appState.currentRecording {
                     // Use Task.sleep for non-blocking delay
                     try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
                     
-                    // Ensure we are on the main thread for UI updates
-                    await MainActor.run {
-                        currentPlayTime += 0.1
-                        if currentPlayTime >= recording.duration {
-                            currentPlayTime = recording.duration
-                            isPlaying = false
-                        }
+                    // Update on main thread
+                    currentPlayTime += 0.1
+                    if currentPlayTime >= recording.duration {
+                        currentPlayTime = recording.duration
+                        isPlaying = false
                     }
                 }
             }
@@ -519,9 +515,7 @@ struct TranscriptModalView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
-                        Task { @MainActor in
-                            isPresented = false
-                        }
+                        isPresented = false
                     }
                 }
             }
@@ -599,9 +593,7 @@ struct InsightModalView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
-                        Task { @MainActor in
-                            isPresented = false
-                        }
+                        isPresented = false
                     }
                 }
             }
