@@ -239,12 +239,10 @@ struct ResultsView: View {
                 }
             }
             .frame(height: 4)
-            .onTapGesture { location in
-                // Calculate progress based on tap position
-                // Using a simple approach for now
-                let screenWidth = UIScreen.main.bounds.width - 48 // Account for padding
-                let progress = Double(location.x) / Double(screenWidth)
-                currentPlayTime = duration * max(0, min(1, progress))
+            // TODO: Add seek functionality later
+            .onTapGesture {
+                // Simple tap to seek to middle for now
+                currentPlayTime = duration * 0.5
             }
             
             // Controls
