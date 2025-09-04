@@ -398,8 +398,6 @@ struct ResultsView: View {
     private func insightRowView(insight: AIInsight, index: Int, totalCount: Int) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text(insight.emoji)
-                    .font(.title2)
                 Text(insight.title)
                     .font(.subheadline)
                     .fontWeight(.semibold)
