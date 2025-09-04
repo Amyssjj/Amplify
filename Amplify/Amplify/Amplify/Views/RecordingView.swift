@@ -100,10 +100,8 @@ struct RecordingView: View {
         .navigationBarHidden(true)
         .onAppear {
             setupRecording()
-            // Trigger bottom sheet emergence after photo expands
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                bottomSheetVisible = true
-            }
+            // Immediate bottom sheet emergence - no delay
+            bottomSheetVisible = true
         }
         .onDisappear {
             cleanupRecording()

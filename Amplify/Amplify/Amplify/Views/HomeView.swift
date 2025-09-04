@@ -186,9 +186,8 @@ struct HomeView: View {
             }
             .disabled(!appState.canRecord)
             .opacity(appState.canRecord ? 1.0 : 0.6)
-            .scaleEffect(recordButtonPressed ? 0.95 : (appState.canRecord ? 1.0 : 0.95))
+            .scaleEffect(appState.canRecord ? 1.0 : 0.95)
             .animation(.interpolatingSpring(stiffness: 400, damping: 25), value: appState.canRecord)
-            .animation(.interpolatingSpring(stiffness: 400, damping: 25), value: recordButtonPressed)
             .accessibilityIdentifier("RecordStoryButton")
             .accessibilityLabel("Record your story")
             .accessibilityHint("Tap to start recording your story about this photo")
@@ -207,21 +206,15 @@ struct HomeView: View {
         
         isTransitioning = true
         
-        // Immediate visual feedback
-        recordButtonPressed = true
-        
         // Immediate haptic feedback
         let lightImpact = UIImpactFeedbackGenerator(style: .light)
         lightImpact.impactOccurred()
         
-        // Ultra-smooth spring transition for seamless photo expansion
-        withAnimation(.interpolatingSpring(stiffness: 180, damping: 40)) {
-            appState.transitionToRecording(with: photo)
-        }
+        // Instant photo transition - no withAnimation wrapper
+        appState.transitionToRecording(with: photo)
         
-        // Reset states quickly
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            recordButtonPressed = false
+        // Reset transition state
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
             isTransitioning = false
         }
         
