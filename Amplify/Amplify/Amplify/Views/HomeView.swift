@@ -19,11 +19,8 @@ struct HomeView: View {
     
     var body: some View {
         GeometryReader { geometry in
-            ZStack {
-                // Background gradient animations - matching React version
-                backgroundAnimations
-                
-                VStack(spacing: 0) {
+            // Using unified ContentView background - no local backgrounds
+            VStack(spacing: 0) {
                     // Header - left aligned like React
                     headerView
                         .padding(.top, 32) 
@@ -47,7 +44,6 @@ struct HomeView: View {
                     recordButtonSection
                         .padding(.bottom, 48)
                 }
-            }
         }
         .navigationBarHidden(true)
         .task {
@@ -269,49 +265,6 @@ struct HomeView: View {
         // Request speech recognition permission
         let speechPermission = await speechService.requestSpeechRecognitionPermission()
         appState.updateSpeechPermissionStatus(speechPermission)
-    }
-    
-    // MARK: - Background Animations - Matching React floating elements
-    
-    private var backgroundAnimations: some View {
-        ZStack {
-            // Top-right floating gradient - matches React version
-            Circle()
-                .fill(
-                    RadialGradient(
-                        gradient: Gradient(colors: [
-                            Color.blue.opacity(0.3),
-                            Color.purple.opacity(0.2),
-                            Color.clear
-                        ]),
-                        center: .center,
-                        startRadius: 0,
-                        endRadius: 80
-                    )
-                )
-                .frame(width: 160, height: 160)
-                .blur(radius: 40)
-                .position(x: UIScreen.main.bounds.width * 0.8, y: 100)
-            
-            // Bottom-left floating gradient - matches React version  
-            Circle()
-                .fill(
-                    RadialGradient(
-                        gradient: Gradient(colors: [
-                            Color.pink.opacity(0.2),
-                            Color.orange.opacity(0.3),
-                            Color.clear
-                        ]),
-                        center: .center,
-                        startRadius: 0,
-                        endRadius: 64
-                    )
-                )
-                .frame(width: 128, height: 128)
-                .blur(radius: 40)
-                .position(x: UIScreen.main.bounds.width * 0.2, y: UIScreen.main.bounds.height * 0.8)
-        }
-        .allowsHitTesting(false) // Don't interfere with touch events
     }
     
     // MARK: - Dots Indicator - Shows swipe capability

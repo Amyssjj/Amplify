@@ -87,14 +87,7 @@ struct RecordingView: View {
                     .offset(y: bottomSheetVisible ? (geometry.size.height * 0.5) - bottomSheetOverlap : geometry.size.height)
                     .animation(.interpolatingSpring(stiffness: 180, damping: 40).delay(0.15), value: bottomSheetVisible)
             }
-            .background(
-                // Consistent gradient background matching HomeView
-                LinearGradient(
-                    gradient: Gradient(colors: [Color.blue.opacity(0.1), Color.purple.opacity(0.1)]),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            )
+            // No background - using unified ContentView background
         }
         .ignoresSafeArea()
         .navigationBarHidden(true)
