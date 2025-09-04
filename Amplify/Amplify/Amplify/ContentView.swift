@@ -124,12 +124,12 @@ struct RecordingTransitionModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .scaleEffect(
-                x: 0.95 + (0.05 * progress), 
-                y: 0.95 + (0.05 * progress),
+                x: 0.96 + (0.04 * progress), 
+                y: 0.96 + (0.04 * progress),
                 anchor: .center
             )
-            .offset(y: -20 * (1 - progress))
-            .opacity(0.3 + (0.7 * progress))
+            .offset(y: -15 * (1 - progress))
+            // Removed problematic opacity - views should be fully visible
 }
 
 #if DEBUG
