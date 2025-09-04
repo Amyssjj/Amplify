@@ -83,13 +83,7 @@ struct ResultsView: View {
                 Text("Your Story")
                     .font(.headline)
                     .fontWeight(.semibold)
-                    .foregroundStyle(
-                        LinearGradient(
-                            gradient: Gradient(colors: [Color.blue, Color.purple]),
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
+                    .foregroundStyle(titleGradient)
                 
                 if let recording = appState.currentRecording {
                     Text(formatDuration(recording.duration))
@@ -138,13 +132,7 @@ struct ResultsView: View {
                         } else {
                             // Fallback gradient if no photo
                             RoundedRectangle(cornerRadius: 16)
-                                .fill(
-                                    LinearGradient(
-                                        gradient: Gradient(colors: [Color.blue.opacity(0.3), Color.purple.opacity(0.3)]),
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
-                                )
+                                .fill(fallbackPhotoGradient)
                                 .frame(height: 192)
                         }
                     }
@@ -307,6 +295,22 @@ struct ResultsView: View {
             )
     }
     
+    private var titleGradient: LinearGradient {
+        LinearGradient(
+            gradient: Gradient(colors: [Color.blue, Color.purple]),
+            startPoint: .leading,
+            endPoint: .trailing
+        )
+    }
+    
+    private var fallbackPhotoGradient: LinearGradient {
+        LinearGradient(
+            gradient: Gradient(colors: [.blue.opacity(0.3), .purple.opacity(0.3)]),
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+    
     // MARK: - Transcript Card - Matching React TranscriptCard
     
     private var transcriptCard: some View {
@@ -320,13 +324,7 @@ struct ResultsView: View {
                 Text("Transcription")
                     .font(.headline)
                     .fontWeight(.semibold)
-                    .foregroundStyle(
-                        LinearGradient(
-                            gradient: Gradient(colors: [Color.blue, Color.purple]),
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
+                    .foregroundStyle(titleGradient)
                 
                 Spacer()
             }
@@ -367,13 +365,7 @@ struct ResultsView: View {
                 Text("Sharp Insights")
                     .font(.headline)
                     .fontWeight(.semibold)
-                    .foregroundStyle(
-                        LinearGradient(
-                            gradient: Gradient(colors: [Color.blue, Color.purple]),
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
+                    .foregroundStyle(titleGradient)
                 
                 Spacer()
             }
