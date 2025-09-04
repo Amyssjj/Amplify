@@ -215,7 +215,7 @@ struct HomeView: View {
         lightImpact.impactOccurred()
         
         // Ultra-smooth spring transition for seamless photo expansion
-        withAnimation(.interpolatingSpring(stiffness: 180, damping: 40, blendDuration: 0.2)) {
+        withAnimation(.interpolatingSpring(stiffness: 180, damping: 40)) {
             appState.transitionToRecording(with: photo)
         }
         
