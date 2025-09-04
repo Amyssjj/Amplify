@@ -18,7 +18,6 @@ struct RecordingView: View {
     @State private var pulseAnimation = false
     @State private var backButtonPressed = false
     @State private var isTransitioning = false
-    @State private var bottomSheetVisible = false
     
     private let maxRecordingDuration: TimeInterval = 60.0
     private let bottomSheetOverlap: CGFloat = 24
@@ -69,7 +68,7 @@ struct RecordingView: View {
                 }
                 .frame(height: geometry.size.height * 0.5)
                 
-                // Bottom sheet with elegant emergence animation
+                // Bottom sheet with coordinated slide-up animation
                 bottomSheetContent()
                     .frame(width: geometry.size.width, height: (geometry.size.height * 0.5) + bottomSheetOverlap)
                     .background(
@@ -84,8 +83,8 @@ struct RecordingView: View {
                             )
                             .shadow(color: .black.opacity(0.15), radius: 20, x: 0, y: -5)
                     )
-                    .offset(y: bottomSheetVisible ? (geometry.size.height * 0.5) - bottomSheetOverlap : geometry.size.height)
-                    .animation(.interpolatingSpring(stiffness: 180, damping: 40).delay(0.15), value: bottomSheetVisible)
+                    .transition(.move(edge: .bottom))
+                    .zIndex(1)
             }
             // No background - using unified ContentView background
         }
@@ -93,12 +92,9 @@ struct RecordingView: View {
         .navigationBarHidden(true)
         .onAppear {
             setupRecording()
-            // Immediate bottom sheet emergence - no delay
-            bottomSheetVisible = true
         }
         .onDisappear {
             cleanupRecording()
-            bottomSheetVisible = false
         }
     }
     
