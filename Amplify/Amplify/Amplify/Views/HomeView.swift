@@ -337,12 +337,15 @@ struct HomeView: View {
 
 #if DEBUG
 struct HomeView_Previews: PreviewProvider {
+    @Namespace static var mockPhotoTransition
+    
     static var previews: some View {
         HomeView(
             appState: AppStateManager(),
             photoService: PhotoLibraryService(),
             audioService: AudioRecordingService(),
-            speechService: SpeechRecognitionService()
+            speechService: SpeechRecognitionService(),
+            photoTransition: mockPhotoTransition
         )
         .previewDevice("iPhone 15 Pro")
     }

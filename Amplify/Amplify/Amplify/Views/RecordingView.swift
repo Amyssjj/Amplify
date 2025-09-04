@@ -417,11 +417,14 @@ struct CircularProgressView: View {
 
 #if DEBUG
 struct RecordingView_Previews: PreviewProvider {
+    @Namespace static var mockPhotoTransition
+    
     static var previews: some View {
         RecordingView(
             appState: AppStateManager(),
             audioService: AudioRecordingService(),
-            speechService: SpeechRecognitionService()
+            speechService: SpeechRecognitionService(),
+            photoTransition: mockPhotoTransition
         )
         .previewDevice("iPhone 15 Pro")
     }
