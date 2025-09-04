@@ -81,11 +81,13 @@ struct ContentView: View {
     private func customTransition(for screen: AppScreen) -> AnyTransition {
         switch screen {
         case .recording:
-            // Modern iOS-style stable transition
+            // Natural spatial hierarchy - diving deeper into app
             return AnyTransition.asymmetric(
-                insertion: .scale(scale: 0.98, anchor: .center)
+                insertion: .scale(scale: 0.95, anchor: .center)
+                    .combined(with: .move(edge: .bottom))
                     .combined(with: .opacity),
-                removal: .scale(scale: 1.02, anchor: .center)
+                removal: .scale(scale: 1.05, anchor: .center)
+                    .combined(with: .move(edge: .top))
                     .combined(with: .opacity)
             )
         case .home:

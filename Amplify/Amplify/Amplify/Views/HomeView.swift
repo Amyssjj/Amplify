@@ -212,8 +212,8 @@ struct HomeView: View {
         let lightImpact = UIImpactFeedbackGenerator(style: .light)
         lightImpact.impactOccurred()
         
-        // Modern iOS-style smooth transition
-        withAnimation(.easeInOut(duration: 0.35)) {
+        // Natural spring transition matching the return animation
+        withAnimation(.interpolatingSpring(stiffness: 300, damping: 30)) {
             appState.transitionToRecording(with: photo)
         }
         
