@@ -21,20 +21,20 @@ struct ProcessingView: View {
     @State private var innerRingScale: CGFloat = 0.9
     @State private var coreScale: CGFloat = 1.0
     @State private var coreShadowRadius: CGFloat = 4
-    @State private var orbitalScales: [CGFloat] = [0.5, 0.5, 0.5]
+    @State private var orbitalScales: [CGFloat] = Array(repeating: 0.5, count: 3)
     
     // Text animation states
     @State private var subtitleOpacity: Double = 0.7
     @State private var descriptionOpacity: Double = 0.0
     
     // Progress dots animation states
-    @State private var dotScales: [CGFloat] = [1.0, 1.0, 1.0]
-    @State private var dotOpacities: [Double] = [0.4, 0.4, 0.4]
+    @State private var dotScales: [CGFloat] = Array(repeating: 1.0, count: 3)
+    @State private var dotOpacities: [Double] = Array(repeating: 0.4, count: 3)
     
-    // Floating particles
-    @State private var particlePositions: [CGPoint] = []
-    @State private var particleOffsets: [CGFloat] = []
-    @State private var particleScales: [CGFloat] = []
+    // Floating particles - properly initialized
+    @State private var particlePositions: [CGPoint] = Array(repeating: CGPoint.zero, count: 20)
+    @State private var particleOffsets: [CGFloat] = Array(repeating: 0, count: 20)
+    @State private var particleScales: [CGFloat] = Array(repeating: 0.5, count: 20)
     
     private let animationMessages = [
         "Analyzing your story structure...",
@@ -139,7 +139,7 @@ struct ProcessingView: View {
                     .shadow(color: .blue.opacity(0.5), radius: coreShadowRadius, x: 0, y: 0)
                 
                 // Orbital elements
-                ForEach(0..<3) { index in
+                ForEach(0..<min(3, orbitalScales.count), id: \.self) { index in
                     Circle()
                         .fill(
                             LinearGradient(
@@ -151,7 +151,7 @@ struct ProcessingView: View {
                         .frame(width: 12, height: 12)
                         .offset(x: 80)
                         .rotationEffect(.degrees(rotationAngle * Double(1 + index) + Double(index * 120)))
-                        .scaleEffect(orbitalScales[index])
+                        .scaleEffect(orbitalScales.indices.contains(index) ? orbitalScales[index] : 0.5)
                 }
             }
             .accessibilityIdentifier("ProcessingAnimation")
@@ -184,12 +184,12 @@ struct ProcessingView: View {
     
     private var progressDots: some View {
         HStack(spacing: 8) {
-            ForEach(0..<3) { index in
+            ForEach(0..<min(3, dotScales.count), id: \.self) { index in
                 Circle()
                     .fill(Color.blue)
                     .frame(width: 8, height: 8)
-                    .scaleEffect(dotScales[index])
-                    .opacity(dotOpacities[index])
+                    .scaleEffect(dotScales.indices.contains(index) ? dotScales[index] : 1.0)
+                    .opacity(dotOpacities.indices.contains(index) ? dotOpacities[index] : 0.4)
             }
         }
         .padding(.top, 32)
@@ -199,7 +199,7 @@ struct ProcessingView: View {
     
     private func floatingParticlesBackground(geometry: GeometryProxy) -> some View {
         ZStack {
-            ForEach(0..<20) { index in
+            ForEach(0..<min(20, particlePositions.count), id: \.self) { index in
                 Circle()
                     .fill(
                         LinearGradient(
@@ -210,12 +210,12 @@ struct ProcessingView: View {
                     )
                     .frame(width: 8, height: 8)
                     .position(
-                        x: particlePositions[index].x * geometry.size.width,
-                        y: particlePositions[index].y * geometry.size.height
+                        x: (particlePositions.indices.contains(index) ? particlePositions[index].x : 0.5) * geometry.size.width,
+                        y: (particlePositions.indices.contains(index) ? particlePositions[index].y : 0.5) * geometry.size.height
                     )
-                    .offset(y: particleOffsets[index])
+                    .offset(y: particleOffsets.indices.contains(index) ? particleOffsets[index] : 0)
                     .opacity(0.6)
-                    .scaleEffect(particleScales[index])
+                    .scaleEffect(particleScales.indices.contains(index) ? particleScales[index] : 0.5)
             }
         }
     }
