@@ -84,11 +84,8 @@ struct ContentView: View {
     private func customTransition(for screen: AppScreen) -> AnyTransition {
         switch screen {
         case .recording:
-            // Minimal transition - let matchedGeometryEffect handle photo expansion
-            return AnyTransition.asymmetric(
-                insertion: .opacity,
-                removal: .opacity
-            )
+            // No transition - let matchedGeometryEffect handle unified photo expansion+movement
+            return AnyTransition.identity
         case .home:
             // Elegant return to home with refined spring physics
             return AnyTransition.asymmetric(
