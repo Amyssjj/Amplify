@@ -61,7 +61,7 @@ struct ContentView: View {
                     insertion: customTransition(for: appState.currentScreen),
                     removal: customTransition(for: appState.currentScreen)
                 ))
-                .animation(.easeInOut(duration: 0.35), value: appState.currentScreen)
+                .animation(.spring(response: 0.55, dampingFraction: 0.825, blendDuration: 0), value: appState.currentScreen)
             }
         }
         .alert(
@@ -76,32 +76,36 @@ struct ContentView: View {
         }
     }
     
-    // MARK: - Custom Transitions
+    // MARK: - iPhone Notes-Style Transitions
     
     private func customTransition(for screen: AppScreen) -> AnyTransition {
         switch screen {
         case .recording:
-            // Modern iOS-style stable transition
+            // iPhone Notes-style coordinated expansion
             return AnyTransition.asymmetric(
-                insertion: .scale(scale: 0.98, anchor: .center)
-                    .combined(with: .opacity),
-                removal: .scale(scale: 1.02, anchor: .center)
-                    .combined(with: .opacity)
+                insertion: .modifier(
+                    active: RecordingTransitionModifier(progress: 0),
+                    identity: RecordingTransitionModifier(progress: 1)
+                ),
+                removal: .modifier(
+                    active: RecordingTransitionModifier(progress: 1),
+                    identity: RecordingTransitionModifier(progress: 0)
+                )
             )
         case .home:
-            // Smooth return to home with spring physics
+            // Smooth return with gentle scaling
             return AnyTransition.asymmetric(
-                insertion: .scale(scale: 0.95, anchor: .center)
-                    .combined(with: .move(edge: .top))
-                    .combined(with: .opacity),
-                removal: .scale(scale: 1.05, anchor: .center)
-                    .combined(with: .move(edge: .bottom))
+                insertion: .scale(scale: 0.92, anchor: .center)
                     .combined(with: .opacity)
+                    .combined(with: .move(edge: .top)),
+                removal: .scale(scale: 1.08, anchor: .center)
+                    .combined(with: .opacity)
+                    .combined(with: .move(edge: .bottom))
             )
         case .processing:
             return AnyTransition.asymmetric(
-                insertion: .opacity.combined(with: .scale(scale: 0.9, anchor: .center)),
-                removal: .opacity.combined(with: .scale(scale: 1.1, anchor: .center))
+                insertion: .opacity.combined(with: .scale(scale: 0.94, anchor: .center)),
+                removal: .opacity.combined(with: .scale(scale: 1.06, anchor: .center))
             )
         case .results:
             return AnyTransition.asymmetric(
@@ -110,6 +114,22 @@ struct ContentView: View {
             )
         }
     }
+}
+
+// MARK: - Recording Transition Modifier
+
+struct RecordingTransitionModifier: ViewModifier {
+    let progress: Double
+    
+    func body(content: Content) -> some View {
+        content
+            .scaleEffect(
+                x: 0.95 + (0.05 * progress), 
+                y: 0.95 + (0.05 * progress),
+                anchor: .center
+            )
+            .offset(y: -20 * (1 - progress))
+            .opacity(0.3 + (0.7 * progress))
 }
 
 #if DEBUG
