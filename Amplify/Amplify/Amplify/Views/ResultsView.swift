@@ -10,25 +10,32 @@ import SwiftUI
 struct ResultsView: View {
     @ObservedObject var appState: AppStateManager
     
-    @State private var selectedInsightIndex = 0
+    @State private var selectedCardIndex = 0 // 0 = transcript, 1 = insights
     @State private var showingTranscriptModal = false
     @State private var showingInsightModal = false
     @State private var isPlaying = false
+    @State private var currentPlayTime: Double = 0
+    @State private var dragOffset: CGFloat = 0
     
     var body: some View {
-        GeometryReader { geometry in
+        ZStack {
+            // Background - matching homepage
+            LinearGradient(
+                gradient: Gradient(colors: [Color.blue.opacity(0.1), Color.purple.opacity(0.1)]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+            
             VStack(spacing: 0) {
-                // Header
+                // Header - matching React design
                 headerView
                 
-                // Enhanced transcript preview
-                transcriptPreviewSection
+                // Photo with Media Player Overlay
+                photoWithMediaPlayerSection
                 
-                // Insights carousel
-                insightsCarouselSection
-                
-                // Action buttons
-                actionButtonsSection
+                // Swipeable Cards
+                swipeableCardsSection
                 
                 Spacer()
             }
@@ -51,219 +58,354 @@ struct ResultsView: View {
         }
     }
     
-    // MARK: - Header View
+    // MARK: - Header View - Matching React Design
     
     private var headerView: some View {
-        GeometryReader { geometry in
-            VStack(spacing: 0) {
-                // Add explicit spacing from top
-                Color.clear
-                    .frame(height: geometry.safeAreaInsets.top + 20)
+        HStack {
+            // Back button - glass effect like React
+            Button(action: { appState.returnToHome() }) {
+                Image(systemName: "arrow.left")
+                    .font(.title3)
+                    .foregroundColor(.primary)
+                    .frame(width: 44, height: 44)
+                    .background(.ultraThinMaterial, in: Circle())
+                    .overlay(
+                        Circle()
+                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                    )
+            }
+            .accessibilityIdentifier("BackButton")
+            
+            Spacer()
+            
+            // Center title and duration - matching React
+            VStack(spacing: 2) {
+                Text("Your Story")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(
+                        LinearGradient(
+                            gradient: Gradient(colors: [Color.blue, Color.purple]),
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
                 
-                HStack {
-                    Button("< Home") {
-                        appState.returnToHome()
-                    }
-                    .foregroundColor(.blue)
-                    .accessibilityIdentifier("ReturnHomeButton")
-                    
-                    Spacer()
-                    
-                    Text("Your Enhanced Story")
-                        .font(.headline)
-                        .foregroundColor(.primary)
-                        .accessibilityIdentifier("YourEnhancedStory")
-                    
-                    Spacer()
-                    
-                    // Play button
-                    Button(action: togglePlayback) {
-                        Image(systemName: isPlaying ? "pause.circle.fill" : "play.circle.fill")
-                            .font(.title2)
-                            .foregroundColor(.blue)
-                    }
-                    .accessibilityIdentifier("PlayEnhancedStory")
-                    .accessibilityLabel(isPlaying ? "Pause story" : "Play enhanced story")
-                }
-                .frame(height: 44)
-                .padding(.horizontal, 24)
-                
-                // Duration and improvement indicator
                 if let recording = appState.currentRecording {
-                    HStack(spacing: 16) {
-                    Label(formatDuration(recording.duration), systemImage: "clock")
+                    Text(formatDuration(recording.duration))
                         .font(.caption)
                         .foregroundColor(.secondary)
-                    
-                    if recording.enhancedTranscript != nil {
-                        Label("Enhanced", systemImage: "sparkles")
-                            .font(.caption)
-                            .foregroundColor(.green)
-                    }
-                    
-                    Spacer()
                 }
-                .padding(.horizontal, 24)
             }
+            
+            Spacer()
+            
+            // Share button - glass effect like React
+            Button(action: { /* TODO: Share functionality */ }) {
+                Image(systemName: "square.and.arrow.up")
+                    .font(.title3)
+                    .foregroundColor(.primary)
+                    .frame(width: 44, height: 44)
+                    .background(.ultraThinMaterial, in: Circle())
+                    .overlay(
+                        Circle()
+                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                    )
             }
+            .accessibilityIdentifier("ShareButton")
         }
+        .padding(.horizontal, 24)
+        .padding(.top, 12)
         .padding(.bottom, 24)
     }
     
-    // MARK: - Transcript Preview
+    // MARK: - Photo with Media Player Section - Matching React
     
-    private var transcriptPreviewSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
+    private var photoWithMediaPlayerSection: some View {
+        VStack(spacing: 0) {
+            if let recording = appState.currentRecording {
+                ZStack {
+                    // Photo container - matching React h-48 (192px)
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color.gray.opacity(0.3))
+                        .frame(height: 192)
+                        .overlay(
+                            // Placeholder for photo - you'll need to add PhotoData.image property
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [Color.blue.opacity(0.3), Color.purple.opacity(0.3)]),
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                        )
+                        .overlay(
+                            // Subtle gradient overlay for text readability
+                            LinearGradient(
+                                gradient: Gradient(colors: [Color.black.opacity(0.2), Color.clear]),
+                                startPoint: .bottom,
+                                endPoint: .top
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                        )
+                    
+                    // Media Player Overlay - positioned at bottom like React
+                    VStack {
+                        Spacer()
+                        mediaPlayerOverlay(duration: recording.duration)
+                            .padding(.bottom, 16)
+                            .padding(.horizontal, 16)
+                    }
+                }
+                .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
+            }
+        }
+        .padding(.horizontal, 24)
+        .padding(.bottom, 24)
+    }
+    
+    // MARK: - Swipeable Cards Section - Matching React
+    
+    private var swipeableCardsSection: some View {
+        VStack(spacing: 0) {
+            GeometryReader { geometry in
+                HStack(spacing: 0) {
+                    // Transcript Card
+                    transcriptCard
+                        .frame(width: geometry.size.width)
+                    
+                    // Insights Card  
+                    insightsCard
+                        .frame(width: geometry.size.width)
+                }
+                .offset(x: -CGFloat(selectedCardIndex) * geometry.size.width + dragOffset)
+                .gesture(
+                    DragGesture()
+                        .onChanged { value in
+                            dragOffset = value.translation.x
+                        }
+                        .onEnded { value in
+                            let threshold: CGFloat = 100
+                            let newIndex: Int
+                            
+                            if value.translation.x > threshold && selectedCardIndex > 0 {
+                                newIndex = selectedCardIndex - 1
+                            } else if value.translation.x < -threshold && selectedCardIndex < 1 {
+                                newIndex = selectedCardIndex + 1
+                            } else {
+                                newIndex = selectedCardIndex
+                            }
+                            
+                            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                selectedCardIndex = newIndex
+                                dragOffset = 0
+                            }
+                        }
+                )
+                .animation(.spring(response: 0.6, dampingFraction: 0.8), value: selectedCardIndex)
+            }
+            .frame(height: 320)
+            
+            // Card indicator dots
+            HStack(spacing: 8) {
+                ForEach(0..<2, id: \.self) { index in
+                    Circle()
+                        .fill(index == selectedCardIndex ? Color.blue : Color.gray.opacity(0.3))
+                        .frame(width: 8, height: 8)
+                }
+            }
+            .padding(.top, 16)
+        }
+        .padding(.horizontal, 24)
+    }
+    
+    // MARK: - Media Player Overlay - Matching React MiniMediaPlayer
+    
+    private func mediaPlayerOverlay(duration: TimeInterval) -> some View {
+        VStack(spacing: 12) {
+            // Progress bar
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    // Background track
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(Color.white.opacity(0.3))
+                        .frame(height: 4)
+                    
+                    // Progress track
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(Color.white)
+                        .frame(width: geometry.size.width * CGFloat(currentPlayTime / duration), height: 4)
+                }
+            }
+            .frame(height: 4)
+            .onTapGesture { location in
+                // TODO: Implement seek functionality
+                let progress = location.x / UIScreen.main.bounds.width
+                currentPlayTime = duration * Double(progress)
+            }
+            
+            // Controls
             HStack {
-                Text("Enhanced Transcript")
-                    .font(.headline)
-                    .foregroundColor(.primary)
+                // Time display
+                Text(formatDuration(currentPlayTime))
+                    .font(.caption)
+                    .foregroundColor(.white)
+                    .monospacedDigit()
                 
                 Spacer()
                 
-                Button("Expand") {
-                    showingTranscriptModal = true
+                // Play/Pause button
+                Button(action: togglePlayback) {
+                    Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                        .font(.title2)
+                        .foregroundColor(.white)
                 }
-                .font(.caption)
-                .foregroundColor(.blue)
+                
+                Spacer()
+                
+                // Duration display
+                Text(formatDuration(duration))
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.8))
+                    .monospacedDigit()
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(.ultraThinMaterial.opacity(0.8))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                )
+        )
+    }
+    
+    // MARK: - Transcript Card - Matching React TranscriptCard
+    
+    private var transcriptCard: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            // Header with icon and title - matching React
+            HStack(spacing: 8) {
+                Image(systemName: "doc.text")
+                    .font(.title3)
+                    .foregroundColor(.gray)
+                
+                Text("Transcription")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(
+                        LinearGradient(
+                            gradient: Gradient(colors: [Color.blue, Color.purple]),
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                
+                Spacer()
             }
             
-            // Transcript preview container
+            // Transcript content - scrollable
             ScrollView {
                 VStack(alignment: .leading, spacing: 8) {
                     if let recording = appState.currentRecording {
-                        Text(recording.enhancedTranscript ?? recording.transcript)
-                            .font(.body)
-                            .foregroundColor(.primary)
-                            .lineLimit(5)
-                            .multilineTextAlignment(.leading)
+                        let words = recording.transcript.components(separatedBy: " ")
+                        LazyVGrid(columns: [GridItem(.flexible())], alignment: .leading, spacing: 4) {
+                            ForEach(Array(words.enumerated()), id: \.offset) { index, word in
+                                Text(word)
+                                    .font(.body)
+                                    .foregroundColor(.primary)
+                                    .padding(.horizontal, 2)
+                            }
+                        }
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding()
             }
-            .frame(height: 120)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(.ultraThinMaterial)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
-                    )
-            )
-            .onTapGesture {
-                showingTranscriptModal = true
-            }
-            .accessibilityIdentifier("EnhancedTranscript")
-            .accessibilityLabel("Enhanced transcript preview")
-            .accessibilityHint("Tap to view full transcript")
+            .frame(maxHeight: .infinity)
+        }
+        .padding(24)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(.ultraThinMaterial)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                )
+        )
+        .onTapGesture {
+            showingTranscriptModal = true
         }
         .padding(.horizontal, 24)
-        .padding(.bottom, 32)
     }
     
-    // MARK: - Insights Carousel
+    // MARK: - Insights Card - Matching React InsightsCard
     
-    private var insightsCarouselSection: some View {
+    private var insightsCard: some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                Text("AI Insights")
+            // Header with icon and title - matching React
+            HStack(spacing: 8) {
+                Image(systemName: "lightbulb")
+                    .font(.title3)
+                    .foregroundColor(.gray)
+                
+                Text("Sharp Insights")
                     .font(.headline)
-                    .foregroundColor(.primary)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(
+                        LinearGradient(
+                            gradient: Gradient(colors: [Color.blue, Color.purple]),
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
                 
                 Spacer()
-                
-                if let recording = appState.currentRecording {
-                    Text("\(selectedInsightIndex + 1) of \(recording.insights.count)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
             }
-            .padding(.horizontal, 24)
             
-            // Insights carousel
-            if let recording = appState.currentRecording, !recording.insights.isEmpty {
-                TabView(selection: $selectedInsightIndex) {
-                    ForEach(Array(recording.insights.enumerated()), id: \.element.id) { index, insight in
-                        InsightCardView(insight: insight)
-                            .tag(index)
-                            .onTapGesture {
-                                showingInsightModal = true
+            // Insights content - scrollable
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    if let recording = appState.currentRecording {
+                        ForEach(Array(recording.insights.enumerated()), id: \.element.id) { index, insight in
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text(insight.title)
+                                    .font(.subheadline)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.primary)
+                                
+                                Text(insight.description)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                    .lineLimit(3)
                             }
+                            
+                            if index < recording.insights.count - 1 {
+                                Divider()
+                                    .opacity(0.5)
+                            }
+                        }
                     }
                 }
-                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-                .frame(height: 160)
-                .accessibilityIdentifier("InsightsCards")
-                .accessibilityLabel("AI insights carousel")
-            } else {
-                // Empty state
-                VStack(spacing: 12) {
-                    Image(systemName: "lightbulb")
-                        .font(.title)
-                        .foregroundColor(.gray)
-                    
-                    Text("No insights available")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
-                .frame(height: 160)
-                .frame(maxWidth: .infinity)
+                .padding(.bottom, 16)
             }
+            .frame(maxHeight: .infinity)
         }
-        .padding(.bottom, 32)
-    }
-    
-    // MARK: - Action Buttons
-    
-    private var actionButtonsSection: some View {
-        VStack(spacing: 16) {
-            // Save to Toolkit button
-            Button(action: saveToToolkit) {
-                HStack {
-                    Image(systemName: "folder.badge.plus")
-                        .font(.title3)
-                    
-                    Text("Save to Toolkit")
-                        .font(.headline)
-                        .fontWeight(.medium)
-                }
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(
-                    LinearGradient(
-                        gradient: Gradient(colors: [Color.blue, Color.purple]),
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
+        .padding(24)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(.ultraThinMaterial)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
                 )
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
-            .accessibilityLabel("Save enhanced story to toolkit")
-            
-            // Try Again button
-            Button(action: tryAgain) {
-                HStack {
-                    Image(systemName: "arrow.clockwise")
-                        .font(.title3)
-                    
-                    Text("Try Again")
-                        .font(.headline)
-                        .fontWeight(.medium)
-                }
-                .foregroundColor(.blue)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.blue, lineWidth: 2)
-                )
-            }
-            .accessibilityLabel("Try recording another story")
+        )
+        .onTapGesture {
+            showingInsightModal = true
         }
         .padding(.horizontal, 24)
-        .padding(.bottom, 40)
     }
     
     // MARK: - Actions
@@ -275,32 +417,22 @@ struct ResultsView: View {
         
         isPlaying.toggle()
         
-        // TODO: Implement actual audio playback
+        // TODO: Implement actual audio playback with time updates
         if isPlaying {
-            // Start playback
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                isPlaying = false
+            // Simulate playback progress
+            Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
+                if isPlaying, let recording = appState.currentRecording {
+                    currentPlayTime += 0.1
+                    if currentPlayTime >= recording.duration {
+                        currentPlayTime = recording.duration
+                        isPlaying = false
+                        timer.invalidate()
+                    }
+                } else {
+                    timer.invalidate()
+                }
             }
-        } else {
-            // Stop playback
         }
-    }
-    
-    private func saveToToolkit() {
-        // Haptic feedback
-        let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
-        impactFeedback.impactOccurred()
-        
-        // TODO: Implement save to toolkit functionality
-        print("Saving to toolkit...")
-    }
-    
-    private func tryAgain() {
-        // Haptic feedback
-        let impactFeedback = UIImpactFeedbackGenerator(style: .light)
-        impactFeedback.impactOccurred()
-        
-        appState.returnToHome()
     }
     
     private func formatDuration(_ duration: TimeInterval) -> String {
@@ -310,72 +442,7 @@ struct ResultsView: View {
     }
 }
 
-// MARK: - Insight Card View
-
-struct InsightCardView: View {
-    let insight: AIInsight
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // Header with category icon and title
-            HStack {
-                Image(systemName: insight.category.systemIcon)
-                    .font(.title3)
-                    .foregroundColor(.blue)
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(insight.title)
-                        .font(.headline)
-                        .foregroundColor(.primary)
-                        .lineLimit(1)
-                    
-                    Text(insight.category.displayName)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                
-                Spacer()
-                
-                // Confidence indicator
-                ConfidenceIndicatorView(confidence: insight.confidence)
-            }
-            
-            // Description
-            Text(insight.description)
-                .font(.body)
-                .foregroundColor(.primary)
-                .lineLimit(3)
-                .multilineTextAlignment(.leading)
-            
-            // Action indicator
-            if insight.isActionable {
-                HStack {
-                    Image(systemName: "lightbulb.fill")
-                        .font(.caption)
-                        .foregroundColor(.yellow)
-                    
-                    Text("Tap for suggestion")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    Spacer()
-                }
-            }
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(.ultraThinMaterial)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
-                )
-        )
-        .padding(.horizontal, 24)
-    }
-}
-
-// MARK: - Confidence Indicator
+// MARK: - Helper Components (Keeping for modal compatibility)
 
 struct ConfidenceIndicatorView: View {
     let confidence: Double
