@@ -54,38 +54,39 @@ struct ResultsView: View {
     // MARK: - Header View
     
     private var headerView: some View {
-        VStack(spacing: 12) {
-            HStack {
-                Button("< Home") {
-                    appState.returnToHome()
+        GeometryReader { geometry in
+            VStack(spacing: 12) {
+                HStack {
+                    Button("< Home") {
+                        appState.returnToHome()
+                    }
+                    .foregroundColor(.blue)
+                    .accessibilityIdentifier("ReturnHomeButton")
+                    
+                    Spacer()
+                    
+                    Text("Your Enhanced Story")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                        .accessibilityIdentifier("YourEnhancedStory")
+                    
+                    Spacer()
+                    
+                    // Play button
+                    Button(action: togglePlayback) {
+                        Image(systemName: isPlaying ? "pause.circle.fill" : "play.circle.fill")
+                            .font(.title2)
+                            .foregroundColor(.blue)
+                    }
+                    .accessibilityIdentifier("PlayEnhancedStory")
+                    .accessibilityLabel(isPlaying ? "Pause story" : "Play enhanced story")
                 }
-                .foregroundColor(.blue)
-                .accessibilityIdentifier("ReturnHomeButton")
+                .padding(.horizontal, 24)
+                .standardNavigationPosition(safeAreaTop: geometry.safeAreaInsets.top)
                 
-                Spacer()
-                
-                Text("Your Enhanced Story")
-                    .font(.headline)
-                    .foregroundColor(.primary)
-                    .accessibilityIdentifier("YourEnhancedStory")
-                
-                Spacer()
-                
-                // Play button
-                Button(action: togglePlayback) {
-                    Image(systemName: isPlaying ? "pause.circle.fill" : "play.circle.fill")
-                        .font(.title2)
-                        .foregroundColor(.blue)
-                }
-                .accessibilityIdentifier("PlayEnhancedStory")
-                .accessibilityLabel(isPlaying ? "Pause story" : "Play enhanced story")
-            }
-            .padding(.horizontal, 24)
-            .padding(.top, 20)
-            
-            // Duration and improvement indicator
-            if let recording = appState.currentRecording {
-                HStack(spacing: 16) {
+                // Duration and improvement indicator
+                if let recording = appState.currentRecording {
+                    HStack(spacing: 16) {
                     Label(formatDuration(recording.duration), systemImage: "clock")
                         .font(.caption)
                         .foregroundColor(.secondary)
@@ -99,6 +100,7 @@ struct ResultsView: View {
                     Spacer()
                 }
                 .padding(.horizontal, 24)
+            }
             }
         }
         .padding(.bottom, 24)

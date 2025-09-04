@@ -143,13 +143,11 @@ struct RecordingView: View {
                         .fill(.ultraThinMaterial.opacity(0.8))
                 )
             }
-            .frame(height: 44)
             .padding(.horizontal, 16)
-            .padding(.top, 10) // Fine-tune this value (8-12 points typically)
+            .standardNavigationPosition(safeAreaTop: geometry.safeAreaInsets.top)
             
             Spacer()
         }
-        .padding(.top, geometry.safeAreaInsets.top)
         .frame(height: geometry.size.height * 0.5)
     }
     
