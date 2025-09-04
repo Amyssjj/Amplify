@@ -32,8 +32,6 @@ struct RecordingView: View {
                         .aspectRatio(contentMode: .fill)
                         .frame(width: geometry.size.width, height: geometry.size.height * 0.5)
                         .clipped()
-                        .matchedGeometryEffect(id: "photo", in: photoTransition, anchor: .center)
-                        .scaleEffect(1.0, anchor: .center)
                         .overlay(
                             // Dark gradient at bottom for better contrast
                             LinearGradient(
@@ -90,7 +88,7 @@ struct RecordingView: View {
                                 )
                                 .shadow(color: .black.opacity(0.15), radius: 20, x: 0, y: -5)
                         )
-                        .transition(.move(edge: .bottom))
+                        .transition(.move(edge: .bottom).animation(.easeOut(duration: 0.3)))
                         .zIndex(1)
                 }
                 .frame(height: geometry.size.height)

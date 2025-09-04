@@ -113,8 +113,6 @@ struct HomeView: View {
                                 maxHeight: max(200, min(geometry.size.height * 0.35, 280))
                             )
                             .clipShape(RoundedRectangle(cornerRadius: 24))
-                            .matchedGeometryEffect(id: "photo", in: photoTransition, anchor: .center)
-                            .scaleEffect(1.0, anchor: .center)
                             .overlay(
                                 // Subtle gradient overlay like React
                                 LinearGradient(
@@ -209,10 +207,8 @@ struct HomeView: View {
         let lightImpact = UIImpactFeedbackGenerator(style: .light)
         lightImpact.impactOccurred()
         
-        // Ultra-smooth spring animation for seamless photo scaling
-        withAnimation(.spring(response: 0.6, dampingFraction: 0.85, blendDuration: 0.1)) {
-            appState.transitionToRecording(with: photo)
-        }
+        // Instant transition - no photo animation for maximum performance
+        appState.transitionToRecording(with: photo)
         
         // Reset transition state
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
