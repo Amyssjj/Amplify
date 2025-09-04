@@ -49,10 +49,7 @@ struct ContentView: View {
                             speechService: speechService
                         )
                     case .processing:
-                        ProcessingView(
-                            appState: appState,
-                            aiService: aiService
-                        )
+                        ProcessingView(appState: appState, aiService: aiService)
                     case .results:
                         ResultsView(
                             appState: appState
