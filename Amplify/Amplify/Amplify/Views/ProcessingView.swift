@@ -47,13 +47,9 @@ struct ProcessingView: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                // Background gradient - matching original design
+                // Background - exactly matches HomeView/ContentView
                 LinearGradient(
-                    gradient: Gradient(colors: [
-                        Color.blue.opacity(0.05),
-                        Color.white,
-                        Color.purple.opacity(0.05)
-                    ]),
+                    gradient: Gradient(colors: [Color.blue.opacity(0.1), Color.purple.opacity(0.1)]),
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
@@ -69,8 +65,7 @@ struct ProcessingView: View {
                     // Main processing animation
                     processingAnimationSection
                     
-                    // Progress dots only
-                    progressDots
+                    // Dots now inline with title - removed separate section
                     
                     Spacer()
                     Spacer()
@@ -87,12 +82,25 @@ struct ProcessingView: View {
     
     private var processingAnimationSection: some View {
         VStack(spacing: 40) {
-            // Title - minimal and clean
-            Text("Cooking...")
-                .font(.largeTitle)
-                .fontWeight(.semibold)
-                .foregroundColor(.primary)
-                .accessibilityIdentifier("Cooking")
+            // Title with inline breathing dots
+            HStack(spacing: 4) {
+                Text("Cooking")
+                    .font(.largeTitle)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.primary)
+                    .accessibilityIdentifier("Cooking")
+                
+                // Breathing dots right after "Cooking"
+                HStack(spacing: 4) {
+                    ForEach(0..<min(3, dotScales.count), id: \.self) { index in
+                        Circle()
+                            .fill(Color.primary)
+                            .frame(width: 6, height: 6)
+                            .scaleEffect(dotScales.indices.contains(index) ? dotScales[index] : 1.0)
+                            .opacity(dotOpacities.indices.contains(index) ? dotOpacities[index] : 0.4)
+                    }
+                }
+            }
             
             // Concentric rings animation system - matching original design
             ZStack {
