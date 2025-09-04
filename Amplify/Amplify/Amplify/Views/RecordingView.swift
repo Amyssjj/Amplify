@@ -85,7 +85,7 @@ struct RecordingView: View {
                             .shadow(color: .black.opacity(0.15), radius: 20, x: 0, y: -5)
                     )
                     .offset(y: bottomSheetVisible ? (geometry.size.height * 0.5) - bottomSheetOverlap : geometry.size.height)
-                    .animation(.interpolatingSpring(stiffness: 200, damping: 35).delay(0.2), value: bottomSheetVisible)
+                    .animation(.interpolatingSpring(stiffness: 180, damping: 40).delay(0.15), value: bottomSheetVisible)
             }
             .background(
                 // Consistent gradient background matching HomeView

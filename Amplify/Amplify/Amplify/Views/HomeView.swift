@@ -214,8 +214,8 @@ struct HomeView: View {
         let lightImpact = UIImpactFeedbackGenerator(style: .light)
         lightImpact.impactOccurred()
         
-        // Elegant spring transition for smooth spatial movement
-        withAnimation(.interpolatingSpring(stiffness: 200, damping: 35)) {
+        // Ultra-smooth spring transition for seamless photo expansion
+        withAnimation(.interpolatingSpring(stiffness: 180, damping: 40, blendDuration: 0.2)) {
             appState.transitionToRecording(with: photo)
         }
         
