@@ -83,7 +83,7 @@ struct ProcessingView: View {
     private var processingAnimationSection: some View {
         VStack(spacing: 40) {
             // Title with inline breathing dots
-            HStack(spacing: 4) {
+            HStack(spacing: 12) {
                 Text("Cooking")
                     .font(.largeTitle)
                     .fontWeight(.semibold)
@@ -91,7 +91,7 @@ struct ProcessingView: View {
                     .accessibilityIdentifier("Cooking")
                 
                 // Breathing dots right after "Cooking"
-                HStack(spacing: 4) {
+                HStack(spacing: 8) {
                     ForEach(0..<min(3, dotScales.count), id: \.self) { index in
                         Circle()
                             .fill(Color.primary)
