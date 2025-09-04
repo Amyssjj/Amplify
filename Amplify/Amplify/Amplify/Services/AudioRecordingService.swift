@@ -132,8 +132,17 @@ class AudioRecordingService: NSObject, ObservableObject {
             try? FileManager.default.removeItem(at: url)
         }
         
+        // Deactivate audio session to prevent lag on next recording attempt
+        do {
+            try audioSession.setActive(false)
+        } catch {
+            print("Error deactivating audio session during cancel: \(error)")
+        }
+        
+        audioRecorder = nil
         currentRecordingURL = nil
         currentRecordingDuration = 0
+        isPrepared = false
     }
     
     func cleanup() {
