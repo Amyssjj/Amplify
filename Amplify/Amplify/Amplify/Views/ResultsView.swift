@@ -239,14 +239,13 @@ struct ResultsView: View {
                 }
             }
             .frame(height: 4)
-            .gesture(
-                DragGesture(minimumDistance: 0)
-                    .onEnded { value in
-                        // TODO: Implement seek functionality  
-                        let progress = value.location.x / UIScreen.main.bounds.width
-                        currentPlayTime = duration * Double(max(0, min(1, progress)))
-                    }
-            )
+            .onTapGesture { location in
+                // Calculate progress based on tap position
+                // Using a simple approach for now
+                let screenWidth = UIScreen.main.bounds.width - 48 // Account for padding
+                let progress = Double(location.x) / Double(screenWidth)
+                currentPlayTime = duration * max(0, min(1, progress))
+            }
             
             // Controls
             HStack {
