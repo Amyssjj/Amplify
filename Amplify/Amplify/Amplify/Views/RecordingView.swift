@@ -356,8 +356,8 @@ struct RecordingView: View {
         speechService.stopLiveRecognition()
         audioService.cancelRecording()
         
-        // Smooth spring transition back to home - consistent every time
-        withAnimation(.interpolatingSpring(stiffness: 300, damping: 30)) {
+        // Elegant spring transition back to home - consistent refined timing
+        withAnimation(.interpolatingSpring(stiffness: 200, damping: 35)) {
             appState.returnToHome()
         }
         

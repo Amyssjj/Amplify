@@ -61,7 +61,7 @@ struct ContentView: View {
                     insertion: customTransition(for: appState.currentScreen),
                     removal: customTransition(for: appState.currentScreen)
                 ))
-                .animation(.easeInOut(duration: 0.35), value: appState.currentScreen)
+                .animation(.interpolatingSpring(stiffness: 200, damping: 35), value: appState.currentScreen)
             }
         }
         .alert(
@@ -81,22 +81,22 @@ struct ContentView: View {
     private func customTransition(for screen: AppScreen) -> AnyTransition {
         switch screen {
         case .recording:
-            // Natural spatial hierarchy - diving deeper into app
+            // Elegant spatial hierarchy - diving deeper into app
             return AnyTransition.asymmetric(
-                insertion: .scale(scale: 0.95, anchor: .center)
+                insertion: .scale(scale: 0.96, anchor: .center)
                     .combined(with: .move(edge: .bottom))
                     .combined(with: .opacity),
-                removal: .scale(scale: 1.05, anchor: .center)
+                removal: .scale(scale: 1.04, anchor: .center)
                     .combined(with: .move(edge: .top))
                     .combined(with: .opacity)
             )
         case .home:
-            // Smooth return to home with spring physics
+            // Elegant return to home with refined spring physics
             return AnyTransition.asymmetric(
-                insertion: .scale(scale: 0.95, anchor: .center)
+                insertion: .scale(scale: 0.96, anchor: .center)
                     .combined(with: .move(edge: .top))
                     .combined(with: .opacity),
-                removal: .scale(scale: 1.05, anchor: .center)
+                removal: .scale(scale: 1.04, anchor: .center)
                     .combined(with: .move(edge: .bottom))
                     .combined(with: .opacity)
             )
