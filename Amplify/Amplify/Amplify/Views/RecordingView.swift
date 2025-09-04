@@ -57,8 +57,12 @@ struct RecordingView: View {
                         Text("No photo available")
                             .font(.title2)
                             .foregroundColor(.red)
+                        Text("currentPhoto is nil")
+                            .font(.caption)
+                            .foregroundColor(.orange)
                     }
                     .frame(height: geometry.size.height * 0.5)
+                    .background(Color.yellow.opacity(0.3))
                 }
                 
                 // Photo controls overlay
@@ -69,22 +73,26 @@ struct RecordingView: View {
                 .frame(height: geometry.size.height * 0.5)
                 
                 // Bottom sheet with coordinated slide-up animation
-                bottomSheetContent()
-                    .frame(width: geometry.size.width, height: (geometry.size.height * 0.5) + bottomSheetOverlap)
-                    .background(
-                        Color(.systemBackground)
-                            .clipShape(
-                                UnevenRoundedRectangle(
-                                    topLeadingRadius: 24,
-                                    bottomLeadingRadius: 0,
-                                    bottomTrailingRadius: 0,
-                                    topTrailingRadius: 24
+                VStack {
+                    Spacer()
+                    bottomSheetContent()
+                        .frame(width: geometry.size.width, height: (geometry.size.height * 0.5) + bottomSheetOverlap)
+                        .background(
+                            Color(.systemBackground)
+                                .clipShape(
+                                    UnevenRoundedRectangle(
+                                        topLeadingRadius: 24,
+                                        bottomLeadingRadius: 0,
+                                        bottomTrailingRadius: 0,
+                                        topTrailingRadius: 24
+                                    )
                                 )
-                            )
-                            .shadow(color: .black.opacity(0.15), radius: 20, x: 0, y: -5)
-                    )
-                    .transition(.move(edge: .bottom))
-                    .zIndex(1)
+                                .shadow(color: .black.opacity(0.15), radius: 20, x: 0, y: -5)
+                        )
+                        .transition(.move(edge: .bottom))
+                        .zIndex(1)
+                }
+                .frame(height: geometry.size.height)
             }
             // No background - using unified ContentView background
         }
