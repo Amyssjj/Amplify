@@ -49,9 +49,9 @@ struct ResultsView: View {
         }
         .sheet(isPresented: $showingInsightModal) {
             if let recording = appState.currentRecording,
-               selectedInsightIndex < recording.insights.count {
+               !recording.insights.isEmpty {
                 InsightModalView(
-                    insight: recording.insights[selectedInsightIndex],
+                    insight: recording.insights[0], // Show first insight for now
                     isPresented: $showingInsightModal
                 )
             }
@@ -239,11 +239,14 @@ struct ResultsView: View {
                 }
             }
             .frame(height: 4)
-            .onTapGesture { location in
-                // TODO: Implement seek functionality
-                let progress = location.x / UIScreen.main.bounds.width
-                currentPlayTime = duration * Double(progress)
-            }
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onEnded { value in
+                        // TODO: Implement seek functionality  
+                        let progress = value.location.x / UIScreen.main.bounds.width
+                        currentPlayTime = duration * Double(max(0, min(1, progress)))
+                    }
+            )
             
             // Controls
             HStack {
