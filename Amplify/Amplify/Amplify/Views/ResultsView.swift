@@ -55,7 +55,11 @@ struct ResultsView: View {
     
     private var headerView: some View {
         GeometryReader { geometry in
-            VStack(spacing: 12) {
+            VStack(spacing: 0) {
+                // Add explicit spacing from top
+                Color.clear
+                    .frame(height: geometry.safeAreaInsets.top + 20)
+                
                 HStack {
                     Button("< Home") {
                         appState.returnToHome()
@@ -81,8 +85,8 @@ struct ResultsView: View {
                     .accessibilityIdentifier("PlayEnhancedStory")
                     .accessibilityLabel(isPlaying ? "Pause story" : "Play enhanced story")
                 }
+                .frame(height: 44)
                 .padding(.horizontal, 24)
-                .standardNavigationPosition(safeAreaTop: geometry.safeAreaInsets.top)
                 
                 // Duration and improvement indicator
                 if let recording = appState.currentRecording {
