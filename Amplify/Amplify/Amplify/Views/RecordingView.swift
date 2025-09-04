@@ -268,6 +268,9 @@ struct RecordingView: View {
     
     private func setupRecording() {
         Task {
+            // Small delay to ensure previous audio session is fully cleaned up
+            try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+            
             // Prepare audio recording
             let audioResult = await audioService.prepareForRecording()
             

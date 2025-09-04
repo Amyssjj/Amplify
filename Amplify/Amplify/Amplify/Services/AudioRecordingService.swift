@@ -134,7 +134,7 @@ class AudioRecordingService: NSObject, ObservableObject {
         
         // Deactivate audio session to prevent lag on next recording attempt
         do {
-            try audioSession.setActive(false)
+            try audioSession.setActive(false, options: .notifyOthersOnDeactivation)
         } catch {
             print("Error deactivating audio session during cancel: \(error)")
         }
@@ -150,7 +150,7 @@ class AudioRecordingService: NSObject, ObservableObject {
         stopRecordingTimer()
         
         do {
-            try audioSession.setActive(false)
+            try audioSession.setActive(false, options: .notifyOthersOnDeactivation)
         } catch {
             print("Error deactivating audio session: \(error)")
         }
