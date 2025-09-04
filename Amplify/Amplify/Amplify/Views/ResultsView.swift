@@ -127,9 +127,9 @@ struct ResultsView: View {
                 ZStack {
                     // Photo container - exactly matching React h-48 (192px)
                     Group {
-                        if let currentPhoto = appState.currentPhoto, let image = currentPhoto.image {
+                        if let currentPhoto = appState.currentPhoto {
                             // Display actual selected photo
-                            Image(uiImage: image)
+                            Image(uiImage: currentPhoto.image)
                                 .resizable()
                                 .aspectRatio(contentMode: .fill)
                                 .frame(height: 192)
