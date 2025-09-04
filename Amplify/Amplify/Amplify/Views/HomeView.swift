@@ -25,7 +25,7 @@ struct HomeView: View {
                     headerView
                         .padding(.top, 32) 
                         .padding(.bottom, 16)
-                        .transition(.opacity.animation(.easeOut(duration: 0.2)))
+                        .transition(.opacity.animation(.easeOut(duration: 0.3)))
                     
                     // Main content area - matching React layout
                     VStack {
@@ -37,7 +37,7 @@ struct HomeView: View {
                         // Dots indicator
                         dotsIndicator
                             .padding(.top, 16)
-                            .transition(.opacity.animation(.easeOut(duration: 0.2)))
+                            .transition(.opacity.animation(.easeOut(duration: 0.3)))
                         
                         Spacer(minLength: 80)
                     }
@@ -209,8 +209,8 @@ struct HomeView: View {
         let lightImpact = UIImpactFeedbackGenerator(style: .light)
         lightImpact.impactOccurred()
         
-        // Custom synchronized transition with spring animation
-        withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+        // Ultra-smooth spring animation for seamless photo scaling
+        withAnimation(.spring(response: 0.6, dampingFraction: 0.85, blendDuration: 0.1)) {
             appState.transitionToRecording(with: photo)
         }
         
