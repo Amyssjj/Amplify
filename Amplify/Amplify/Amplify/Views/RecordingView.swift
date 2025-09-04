@@ -100,8 +100,7 @@ struct RecordingView: View {
     
     private func photoOverlayControls(geometry: GeometryProxy) -> some View {
         VStack(spacing: 0) {
-            // This positions the controls exactly where iOS navigation items would be
-            HStack(alignment: .center) {
+            HStack {
                 // Back button
                 Button {
                     cancelRecording()
@@ -144,12 +143,14 @@ struct RecordingView: View {
                         .fill(.ultraThinMaterial.opacity(0.8))
                 )
             }
-            .frame(height: 44) // Standard nav bar height
+            .frame(height: 44)
             .padding(.horizontal, 16)
+            .padding(.top, 10) // Fine-tune this value (8-12 points typically)
             
-            Spacer() // Pushes controls to top
+            Spacer()
         }
-        .padding(.top, geometry.safeAreaInsets.top) // Respect safe area only
+        .padding(.top, geometry.safeAreaInsets.top)
+        .frame(height: geometry.size.height * 0.5)
     }
     
     // MARK: - Bottom Sheet Content
