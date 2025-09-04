@@ -125,12 +125,18 @@ struct ResultsView: View {
         VStack(spacing: 0) {
             if let recording = appState.currentRecording {
                 ZStack {
-                    // Photo container - matching React h-48 (192px)
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Color.gray.opacity(0.3))
-                        .frame(height: 192)
-                        .overlay(
-                            // Placeholder for photo - you'll need to add PhotoData.image property
+                    // Photo container - exactly matching React h-48 (192px)
+                    Group {
+                        if let currentPhoto = appState.currentPhoto, let image = currentPhoto.image {
+                            // Display actual selected photo
+                            Image(uiImage: image)
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(height: 192)
+                                .clipped()
+                                .clipShape(RoundedRectangle(cornerRadius: 16))
+                        } else {
+                            // Fallback gradient if no photo
                             RoundedRectangle(cornerRadius: 16)
                                 .fill(
                                     LinearGradient(
@@ -139,16 +145,18 @@ struct ResultsView: View {
                                         endPoint: .bottomTrailing
                                     )
                                 )
+                                .frame(height: 192)
+                        }
+                    }
+                    .overlay(
+                        // Subtle gradient overlay for text readability - matching React
+                        LinearGradient(
+                            gradient: Gradient(colors: [Color.black.opacity(0.2), Color.clear]),
+                            startPoint: .bottom,
+                            endPoint: .top
                         )
-                        .overlay(
-                            // Subtle gradient overlay for text readability
-                            LinearGradient(
-                                gradient: Gradient(colors: [Color.black.opacity(0.2), Color.clear]),
-                                startPoint: .bottom,
-                                endPoint: .top
-                            )
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
-                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                    )
                     
                     // Media Player Overlay - positioned at bottom like React
                     VStack {
@@ -173,11 +181,13 @@ struct ResultsView: View {
                 HStack(spacing: 0) {
                     // Transcript Card
                     transcriptCard
-                        .frame(width: geometry.size.width)
+                        .frame(width: geometry.size.width - 48) // Account for side padding
+                        .padding(.horizontal, 24)
                     
                     // Insights Card  
                     insightsCard
-                        .frame(width: geometry.size.width)
+                        .frame(width: geometry.size.width - 48) // Account for side padding
+                        .padding(.horizontal, 24)
                 }
                 .offset(x: -CGFloat(selectedCardIndex) * geometry.size.width + dragOffset)
                 .gesture(
@@ -205,19 +215,19 @@ struct ResultsView: View {
                 )
                 .animation(.spring(response: 0.6, dampingFraction: 0.8), value: selectedCardIndex)
             }
-            .frame(height: 320)
+            .frame(height: 280) // Optimized height matching React cards
             
-            // Card indicator dots
+            // Card indicator dots - matching React style
             HStack(spacing: 8) {
                 ForEach(0..<2, id: \.self) { index in
                     Circle()
                         .fill(index == selectedCardIndex ? Color.blue : Color.gray.opacity(0.3))
                         .frame(width: 8, height: 8)
+                        .animation(.easeInOut(duration: 0.2), value: selectedCardIndex)
                 }
             }
             .padding(.top, 16)
         }
-        .padding(.horizontal, 24)
     }
     
     // MARK: - Media Player Overlay - Matching React MiniMediaPlayer
@@ -287,7 +297,7 @@ struct ResultsView: View {
     
     private var transcriptCard: some View {
         VStack(alignment: .leading, spacing: 16) {
-            // Header with icon and title - matching React
+            // Header with icon and title - exactly matching React
             HStack(spacing: 8) {
                 Image(systemName: "doc.text")
                     .font(.title3)
@@ -307,26 +317,23 @@ struct ResultsView: View {
                 Spacer()
             }
             
-            // Transcript content - scrollable
+            // Transcript content - scrollable with improved styling
             ScrollView {
                 VStack(alignment: .leading, spacing: 8) {
                     if let recording = appState.currentRecording {
-                        let words = recording.transcript.components(separatedBy: " ")
-                        LazyVGrid(columns: [GridItem(.flexible())], alignment: .leading, spacing: 4) {
-                            ForEach(Array(words.enumerated()), id: \.offset) { index, word in
-                                Text(word)
-                                    .font(.body)
-                                    .foregroundColor(.primary)
-                                    .padding(.horizontal, 2)
-                            }
-                        }
+                        Text(recording.transcript)
+                            .font(.body)
+                            .foregroundColor(.primary)
+                            .lineSpacing(4)
+                            .multilineTextAlignment(.leading)
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.bottom, 16)
             }
             .frame(maxHeight: .infinity)
         }
-        .padding(24)
+        .padding(20)
         .background(
             RoundedRectangle(cornerRadius: 16)
                 .fill(.ultraThinMaterial)
@@ -338,14 +345,13 @@ struct ResultsView: View {
         .onTapGesture {
             showingTranscriptModal = true
         }
-        .padding(.horizontal, 24)
     }
     
     // MARK: - Insights Card - Matching React InsightsCard
     
     private var insightsCard: some View {
         VStack(alignment: .leading, spacing: 16) {
-            // Header with icon and title - matching React
+            // Header with icon and title - exactly matching React
             HStack(spacing: 8) {
                 Image(systemName: "lightbulb")
                     .font(.title3)
@@ -365,26 +371,31 @@ struct ResultsView: View {
                 Spacer()
             }
             
-            // Insights content - scrollable
+            // Insights content - scrollable with improved styling
             ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
+                VStack(alignment: .leading, spacing: 20) {
                     if let recording = appState.currentRecording {
                         ForEach(Array(recording.insights.enumerated()), id: \.element.id) { index, insight in
                             VStack(alignment: .leading, spacing: 8) {
-                                Text(insight.title)
-                                    .font(.subheadline)
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(.primary)
+                                HStack {
+                                    Text(insight.emoji)
+                                        .font(.title2)
+                                    Text(insight.title)
+                                        .font(.subheadline)
+                                        .fontWeight(.semibold)
+                                        .foregroundColor(.primary)
+                                    Spacer()
+                                }
                                 
                                 Text(insight.description)
                                     .font(.caption)
                                     .foregroundColor(.secondary)
-                                    .lineLimit(3)
+                                    .lineSpacing(2)
                             }
                             
                             if index < recording.insights.count - 1 {
                                 Divider()
-                                    .opacity(0.5)
+                                    .opacity(0.3)
                             }
                         }
                     }
@@ -393,7 +404,7 @@ struct ResultsView: View {
             }
             .frame(maxHeight: .infinity)
         }
-        .padding(24)
+        .padding(20)
         .background(
             RoundedRectangle(cornerRadius: 16)
                 .fill(.ultraThinMaterial)
@@ -405,7 +416,6 @@ struct ResultsView: View {
         .onTapGesture {
             showingInsightModal = true
         }
-        .padding(.horizontal, 24)
     }
     
     // MARK: - Actions
