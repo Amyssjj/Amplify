@@ -327,7 +327,7 @@ struct ProcessingView: View {
                 .repeatForever(autoreverses: true)
                 .delay(randomDelay)
             ) {
-                particleOffsets[index] = CGFloat.random(in: -20...(-40))
+                particleOffsets[index] = CGFloat.random(in: -40...(-20))
                 particleScales[index] = CGFloat.random(in: 0.5...1.0)
             }
         }
