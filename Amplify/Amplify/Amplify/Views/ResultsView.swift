@@ -183,15 +183,15 @@ struct ResultsView: View {
                 .gesture(
                     DragGesture()
                         .onChanged { value in
-                            dragOffset = value.translation.x
+                            dragOffset = value.translation.width
                         }
                         .onEnded { value in
                             let threshold: CGFloat = 100
                             let newIndex: Int
                             
-                            if value.translation.x > threshold && selectedCardIndex > 0 {
+                            if value.translation.width > threshold && selectedCardIndex > 0 {
                                 newIndex = selectedCardIndex - 1
-                            } else if value.translation.x < -threshold && selectedCardIndex < 1 {
+                            } else if value.translation.width < -threshold && selectedCardIndex < 1 {
                                 newIndex = selectedCardIndex + 1
                             } else {
                                 newIndex = selectedCardIndex
