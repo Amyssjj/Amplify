@@ -69,10 +69,7 @@ struct ProcessingView: View {
                     // Main processing animation
                     processingAnimationSection
                     
-                    // Enhanced text content
-                    enhancedTextContent
-                    
-                    // Progress dots
+                    // Progress dots only
                     progressDots
                     
                     Spacer()
@@ -90,65 +87,53 @@ struct ProcessingView: View {
     
     private var processingAnimationSection: some View {
         VStack(spacing: 40) {
-            // Title - matching original design
-            Text("Cooking now...")
+            // Title - minimal and clean
+            Text("Cooking...")
                 .font(.largeTitle)
                 .fontWeight(.semibold)
-                .foregroundStyle(
-                    LinearGradient(
-                        gradient: Gradient(colors: [Color.blue, Color.purple]),
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                )
-                .accessibilityIdentifier("CookingNow")
+                .foregroundColor(.primary)
+                .accessibilityIdentifier("Cooking")
             
             // Concentric rings animation system - matching original design
             ZStack {
-                // Outer ring - scales and changes border color
+                // Outer ring - neutral colors
                 Circle()
                     .stroke(
-                        Color.blue.opacity(outerRingOpacity),
+                        Color.blue.opacity(outerRingOpacity * 0.3),
                         lineWidth: 2
                     )
                     .frame(width: 128, height: 128)
                     .scaleEffect(outerRingScale)
                     .rotationEffect(.degrees(rotationAngle))
                 
-                // Inner ring - counter-rotates and scales
+                // Inner ring - neutral colors
                 Circle()
                     .stroke(
-                        Color.purple.opacity(0.6),
+                        Color.purple.opacity(0.2),
                         lineWidth: 2
                     )
                     .frame(width: 80, height: 80)
                     .scaleEffect(innerRingScale)
                     .rotationEffect(.degrees(-rotationAngle * 0.75))
                 
-                // Core - pulsing gradient center
+                // Core - subtle gradient center
                 Circle()
                     .fill(
                         LinearGradient(
-                            gradient: Gradient(colors: [Color.blue, Color.purple]),
+                            gradient: Gradient(colors: [Color.blue.opacity(0.1), Color.purple.opacity(0.1)]),
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
                     )
                     .frame(width: 32, height: 32)
                     .scaleEffect(coreScale)
-                    .shadow(color: .blue.opacity(0.5), radius: coreShadowRadius, x: 0, y: 0)
+                    .shadow(color: .gray.opacity(0.2), radius: coreShadowRadius, x: 0, y: 0)
                 
-                // Orbital elements
+                // Orbital elements - neutral colors
                 ForEach(0..<min(3, orbitalScales.count), id: \.self) { index in
                     Circle()
-                        .fill(
-                            LinearGradient(
-                                gradient: Gradient(colors: [Color.blue, Color.purple]),
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .frame(width: 12, height: 12)
+                        .fill(Color.gray.opacity(0.4))
+                        .frame(width: 8, height: 8)
                         .offset(x: 80)
                         .rotationEffect(.degrees(rotationAngle * Double(1 + index) + Double(index * 120)))
                         .scaleEffect(orbitalScales.indices.contains(index) ? orbitalScales[index] : 0.5)
@@ -186,8 +171,8 @@ struct ProcessingView: View {
         HStack(spacing: 8) {
             ForEach(0..<min(3, dotScales.count), id: \.self) { index in
                 Circle()
-                    .fill(Color.blue)
-                    .frame(width: 8, height: 8)
+                    .fill(Color.primary)
+                    .frame(width: 6, height: 6)
                     .scaleEffect(dotScales.indices.contains(index) ? dotScales[index] : 1.0)
                     .opacity(dotOpacities.indices.contains(index) ? dotOpacities[index] : 0.4)
             }
@@ -203,18 +188,18 @@ struct ProcessingView: View {
                 Circle()
                     .fill(
                         LinearGradient(
-                            gradient: Gradient(colors: [Color.blue.opacity(0.3), Color.purple.opacity(0.3)]),
+                            gradient: Gradient(colors: [Color.blue.opacity(0.1), Color.purple.opacity(0.1)]),
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
                     )
-                    .frame(width: 8, height: 8)
+                    .frame(width: 6, height: 6)
                     .position(
                         x: (particlePositions.indices.contains(index) ? particlePositions[index].x : 0.5) * geometry.size.width,
                         y: (particlePositions.indices.contains(index) ? particlePositions[index].y : 0.5) * geometry.size.height
                     )
                     .offset(y: particleOffsets.indices.contains(index) ? particleOffsets[index] : 0)
-                    .opacity(0.6)
+                    .opacity(0.3)
                     .scaleEffect(particleScales.indices.contains(index) ? particleScales[index] : 0.5)
             }
         }
