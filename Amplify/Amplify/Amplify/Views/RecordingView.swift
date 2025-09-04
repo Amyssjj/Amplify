@@ -100,6 +100,10 @@ struct RecordingView: View {
     
     private func photoOverlayControls(geometry: GeometryProxy) -> some View {
         VStack(spacing: 0) {
+            // Add explicit spacing from top
+            Color.clear
+                .frame(height: geometry.safeAreaInsets.top + 20) // Adjust this value
+            
             HStack {
                 // Back button
                 Button {
@@ -143,12 +147,11 @@ struct RecordingView: View {
                         .fill(.ultraThinMaterial.opacity(0.8))
                 )
             }
+            .frame(height: 44)
             .padding(.horizontal, 16)
-            .standardNavigationPosition(safeAreaTop: geometry.safeAreaInsets.top)
             
-            Spacer()
+            Spacer() // Push everything to top
         }
-        .frame(height: geometry.size.height * 0.5)
     }
     
     // MARK: - Bottom Sheet Content

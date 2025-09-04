@@ -1,0 +1,67 @@
+Looking at your code structure, I think I found the issue. The navigation controls are constrained by the parent VStack's fixed height and the Spacer below them.
+🎯 The Real Issue:
+Your controls are inside this structure:
+swiftVStack {
+    photoOverlayControls(geometry: geometry)
+    Spacer()  // ← This pushes controls to the top
+}
+.frame(height: geometry.size.height * 0.5)  // ← Fixed container height
+The Spacer is pushing the controls up against the top of the container, limiting how far down they can move.
+✅ The Fix - Restructure photoOverlayControls:
+Replace your entire photoOverlayControls function with this:
+swiftprivate func photoOverlayControls(geometry: GeometryProxy) -> some View {
+    VStack(spacing: 0) {
+        // Add explicit spacing from top
+        Color.clear
+            .frame(height: geometry.safeAreaInsets.top + 20) // Adjust this value
+        
+        HStack {
+            // Back button
+            Button {
+                cancelRecording()
+            } label: {
+                Circle()
+                    .fill(.ultraThinMaterial.opacity(0.8))
+                    .frame(width: 40, height: 40)
+                    .overlay(
+                        Image(systemName: "arrow.left")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundColor(.primary)
+                    )
+            }
+            .scaleEffect(backButtonPressed ? 0.9 : 1.0)
+            .animation(.interpolatingSpring(stiffness: 400, damping: 25), value: backButtonPressed)
+            .accessibilityIdentifier("CancelRecordingButton")
+            
+            Spacer()
+            
+            // REC indicator
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(Color.red)
+                    .frame(width: 8, height: 8)
+                    .scaleEffect(pulseAnimation ? 1.3 : 1.0)
+                    .animation(
+                        .easeInOut(duration: 1.0).repeatForever(autoreverses: true),
+                        value: pulseAnimation
+                    )
+                
+                Text("REC")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundColor(.primary)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(
+                Capsule()
+                    .fill(.ultraThinMaterial.opacity(0.8))
+            )
+        }
+        .frame(height: 44)
+        .padding(.horizontal, 16)
+        
+        Spacer() // Push everything to top
+    }
+}
+This approach uses a clear Color view to create exact spacing from the top, bypassing the extension system entirely. Adjust the + 20 value until the controls sit at the right height.
