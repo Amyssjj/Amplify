@@ -149,6 +149,8 @@ struct RecordingView: View {
             }
             .frame(height: 44)
             .padding(.horizontal, 16)
+            .standardNavigationPosition(safeAreaTop: geometry.safeAreaInsets.top)
+            //.padding(.vertical, 24)
             
             Spacer() // Push everything to top
         }
