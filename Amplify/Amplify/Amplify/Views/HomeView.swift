@@ -15,8 +15,6 @@ struct HomeView: View {
     
     @State private var currentPhoto: PhotoData?
     @State private var isLoadingPhoto = true
-    @State private var buttonPressed = false
-    @State private var transitionStarted = false
     
     var body: some View {
         GeometryReader { geometry in
@@ -143,8 +141,6 @@ struct HomeView: View {
                 maxWidth: max(200, geometry.size.width - 48),
                 maxHeight: max(200, min(geometry.size.height * 0.35, 280))
             )
-            .scaleEffect(transitionStarted ? 1.02 : 1.0)
-            .animation(.spring(response: 0.5, dampingFraction: 0.7), value: transitionStarted)
             .padding(.horizontal, 24)
             .gesture(
                 DragGesture()
@@ -188,9 +184,9 @@ struct HomeView: View {
             }
             .disabled(!appState.canRecord)
             .opacity(appState.canRecord ? 1.0 : 0.6)
-            .scaleEffect(buttonPressed ? 0.92 : (appState.canRecord ? 1.0 : 0.95))
-            .animation(.spring(response: 0.4, dampingFraction: 0.8), value: appState.canRecord)
-            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: buttonPressed)
+            .scaleEffect(recordButtonPressed ? 0.95 : (appState.canRecord ? 1.0 : 0.95))
+            .animation(.interpolatingSpring(stiffness: 400, damping: 25), value: appState.canRecord)
+            .animation(.interpolatingSpring(stiffness: 400, damping: 25), value: recordButtonPressed)
             .accessibilityIdentifier("RecordStoryButton")
             .accessibilityLabel("Record your story")
             .accessibilityHint("Tap to start recording your story about this photo")
@@ -209,28 +205,21 @@ struct HomeView: View {
         
         isTransitioning = true
         
-        // Immediate visual feedback with enhanced scaling
-        buttonPressed = true
+        // Immediate visual feedback
+        recordButtonPressed = true
         
         // Immediate haptic feedback
         let lightImpact = UIImpactFeedbackGenerator(style: .light)
         lightImpact.impactOccurred()
         
-        // iPhone Notes-style coordinated transition with staggered timing
-        withAnimation(.spring(response: 0.55, dampingFraction: 0.825, blendDuration: 0)) {
-            transitionStarted = true
+        // Modern iOS-style smooth transition
+        withAnimation(.easeInOut(duration: 0.35)) {
+            appState.transitionToRecording(with: photo)
         }
         
-        // Staggered transition to recording - slight delay for natural flow
+        // Reset states quickly
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.8, blendDuration: 0)) {
-                appState.transitionToRecording(with: photo)
-            }
-        }
-        
-        // Reset button state quickly for responsive feel
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
-            buttonPressed = false
+            recordButtonPressed = false
             isTransitioning = false
         }
         
