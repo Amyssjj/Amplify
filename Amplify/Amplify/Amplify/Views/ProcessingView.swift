@@ -75,6 +75,11 @@ struct ProcessingView: View {
         .navigationBarHidden(true)
         .onAppear {
             startProcessing()
+            
+            // Auto-transition after 3 seconds (temporary until backend connected)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                appState.currentScreen = .results
+            }
         }
     }
     
