@@ -12,6 +12,7 @@ struct HomeView: View {
     @ObservedObject var photoService: PhotoLibraryService
     @ObservedObject var audioService: AudioRecordingService
     @ObservedObject var speechService: SpeechRecognitionService
+    let photoTransition: Namespace.ID
     
     @State private var currentPhoto: PhotoData?
     @State private var isLoadingPhoto = true
@@ -114,6 +115,7 @@ struct HomeView: View {
                                 maxHeight: max(200, min(geometry.size.height * 0.35, 280))
                             )
                             .clipShape(RoundedRectangle(cornerRadius: 24))
+                            .matchedGeometryEffect(id: "photo", in: photoTransition)
                             .overlay(
                                 // Subtle gradient overlay like React
                                 LinearGradient(

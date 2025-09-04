@@ -11,12 +11,14 @@ struct RecordingView: View {
     @ObservedObject var appState: AppStateManager
     @ObservedObject var audioService: AudioRecordingService
     @ObservedObject var speechService: SpeechRecognitionService
+    let photoTransition: Namespace.ID
     
     @State private var currentTranscript = ""
     @State private var recordingStarted = false
     @State private var pulseAnimation = false
     @State private var backButtonPressed = false
     @State private var isTransitioning = false
+    @State private var bottomSheetVisible = false
     
     private let maxRecordingDuration: TimeInterval = 60.0
     private let bottomSheetOverlap: CGFloat = 24
@@ -31,6 +33,7 @@ struct RecordingView: View {
                         .aspectRatio(contentMode: .fill)
                         .frame(width: geometry.size.width, height: geometry.size.height * 0.5)
                         .clipped()
+                        .matchedGeometryEffect(id: "photo", in: photoTransition)
                         .overlay(
                             // Dark gradient at bottom for better contrast
                             LinearGradient(
@@ -66,7 +69,7 @@ struct RecordingView: View {
                 }
                 .frame(height: geometry.size.height * 0.5)
                 
-                // Bottom sheet with clean overlap
+                // Bottom sheet with elegant emergence animation
                 bottomSheetContent()
                     .frame(width: geometry.size.width, height: (geometry.size.height * 0.5) + bottomSheetOverlap)
                     .background(
@@ -81,7 +84,8 @@ struct RecordingView: View {
                             )
                             .shadow(color: .black.opacity(0.15), radius: 20, x: 0, y: -5)
                     )
-                    .offset(y: (geometry.size.height * 0.5) - bottomSheetOverlap)
+                    .offset(y: bottomSheetVisible ? (geometry.size.height * 0.5) - bottomSheetOverlap : geometry.size.height)
+                    .animation(.interpolatingSpring(stiffness: 200, damping: 35).delay(0.2), value: bottomSheetVisible)
             }
             .background(Color.black) // Fill any gaps with black
         }
@@ -89,9 +93,14 @@ struct RecordingView: View {
         .navigationBarHidden(true)
         .onAppear {
             setupRecording()
+            // Trigger bottom sheet emergence after photo expands
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                bottomSheetVisible = true
+            }
         }
         .onDisappear {
             cleanupRecording()
+            bottomSheetVisible = false
         }
     }
     

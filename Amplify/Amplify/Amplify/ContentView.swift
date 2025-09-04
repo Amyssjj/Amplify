@@ -21,6 +21,7 @@ struct ContentView: View {
     @StateObject private var audioService = AudioRecordingService()
     @StateObject private var speechService = SpeechRecognitionService()
     @StateObject private var aiService = AIEnhancementService()
+    @Namespace private var photoTransition
     
     var body: some View {
         NavigationStack {
@@ -41,13 +42,15 @@ struct ContentView: View {
                             appState: appState,
                             photoService: photoService,
                             audioService: audioService,
-                            speechService: speechService
+                            speechService: speechService,
+                            photoTransition: photoTransition
                         )
                     case .recording:
                         RecordingView(
                             appState: appState,
                             audioService: audioService,
-                            speechService: speechService
+                            speechService: speechService,
+                            photoTransition: photoTransition
                         )
                     case .processing:
                         ProcessingView(appState: appState, aiService: aiService)
@@ -81,14 +84,10 @@ struct ContentView: View {
     private func customTransition(for screen: AppScreen) -> AnyTransition {
         switch screen {
         case .recording:
-            // Elegant spatial hierarchy - diving deeper into app
+            // Minimal transition - let matchedGeometryEffect handle photo expansion
             return AnyTransition.asymmetric(
-                insertion: .scale(scale: 0.96, anchor: .center)
-                    .combined(with: .move(edge: .bottom))
-                    .combined(with: .opacity),
-                removal: .scale(scale: 1.04, anchor: .center)
-                    .combined(with: .move(edge: .top))
-                    .combined(with: .opacity)
+                insertion: .opacity,
+                removal: .opacity
             )
         case .home:
             // Elegant return to home with refined spring physics
