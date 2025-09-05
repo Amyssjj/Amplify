@@ -63,7 +63,12 @@ struct ResultsView: View {
     private var headerView: some View {
         HStack {
             // Back button - glass effect like React
-            Button(action: { appState.returnToHome() }) {
+            Button(action: { 
+                // Ensure back action works during playback
+                isPlaying = false
+                currentPlayTime = 0
+                appState.returnToHome() 
+            }) {
                 Image(systemName: "arrow.left")
                     .font(.title3)
                     .foregroundColor(.primary)
@@ -75,6 +80,8 @@ struct ResultsView: View {
                     )
             }
             .accessibilityIdentifier("BackButton")
+            .allowsHitTesting(true)
+            .zIndex(1000)
             
             Spacer()
             
@@ -179,7 +186,7 @@ struct ResultsView: View {
                 }
                 .offset(x: -CGFloat(selectedCardIndex) * geometry.size.width + dragOffset)
                 .gesture(
-                    DragGesture()
+                    DragGesture(coordinateSpace: .local)
                         .onChanged { value in
                             dragOffset = value.translation.width
                         }
