@@ -84,7 +84,7 @@ struct ProcessingView: View {
             // Title with inline breathing dots
             HStack(spacing: 12) {
                 Text("Cooking")
-                    .font(.largeTitle)
+                    .font(.title2)
                     .fontWeight(.semibold)
                     .foregroundColor(.primary)
                     .accessibilityIdentifier("Cooking")
