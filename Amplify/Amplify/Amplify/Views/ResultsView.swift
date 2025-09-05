@@ -150,7 +150,7 @@ struct ResultsView: View {
                     VStack {
                         Spacer()
                         mediaPlayerOverlay(duration: recording.duration)
-                            .padding(.bottom, 16)
+                            .padding(.bottom, 26)
                             .padding(.horizontal, 12)
                     }
                 }
