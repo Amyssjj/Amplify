@@ -110,7 +110,7 @@ struct ResultsView: View {
         }
         .padding(.horizontal, 24)
         .padding(.top, 12)
-        .padding(.bottom, 24)
+        .padding(.bottom, 8)
     }
     
     // MARK: - Photo with Media Player Section - Matching React
@@ -146,19 +146,19 @@ struct ResultsView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                     )
                     
-                    // Media Player Overlay - positioned at bottom like React
+                    // Media Player Overlay - positioned at bottom ON the photo (podcast style)
                     VStack {
                         Spacer()
                         mediaPlayerOverlay(duration: recording.duration)
-                            .padding(.bottom, 16)
-                            .padding(.horizontal, 16)
+                            .padding(.bottom, 12)
+                            .padding(.horizontal, 12)
                     }
                 }
                 .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
             }
         }
         .padding(.horizontal, 24)
-        .padding(.bottom, 24)
+        .padding(.bottom, 16)
     }
     
     // MARK: - Swipeable Cards Section - Matching React
@@ -203,7 +203,7 @@ struct ResultsView: View {
                 )
                 .animation(.spring(response: 0.6, dampingFraction: 0.8), value: selectedCardIndex)
             }
-            .frame(height: 280) // Optimized height matching React cards
+            .frame(height: 400) // Expanded height for better content display
             
             // Card indicator dots - matching React style
             HStack(spacing: 8) {
