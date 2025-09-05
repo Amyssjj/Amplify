@@ -47,13 +47,7 @@ struct ProcessingView: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                // Background - exactly matches HomeView/ContentView
-                LinearGradient(
-                    gradient: Gradient(colors: [Color.blue.opacity(0.1), Color.purple.opacity(0.1)]),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
+                // Using unified ContentView background - no local backgrounds
                 
                 // Floating particles background
                 floatingParticlesBackground(geometry: geometry)

@@ -19,13 +19,7 @@ struct ResultsView: View {
     
     var body: some View {
         ZStack {
-            // Background - matching homepage
-            LinearGradient(
-                gradient: Gradient(colors: [Color.blue.opacity(0.1), Color.purple.opacity(0.1)]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
+            // Using unified ContentView background - no local backgrounds
             
             VStack(spacing: 0) {
                 // Header - matching React design
