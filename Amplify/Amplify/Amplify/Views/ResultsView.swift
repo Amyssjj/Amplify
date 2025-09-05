@@ -22,14 +22,16 @@ struct ResultsView: View {
             // Using unified ContentView background - no local backgrounds
             
             VStack(spacing: 0) {
-                // Header - matching React design
+                // Header - matching React design (highest priority)
                 headerView
                 
                 // Photo with Media Player Overlay
                 photoWithMediaPlayerSection
+                    .zIndex(1)
                 
                 // Swipeable Cards
                 swipeableCardsSection
+                    .zIndex(1)
                 
                 Spacer()
             }
@@ -74,8 +76,9 @@ struct ResultsView: View {
                     )
             }
             .accessibilityIdentifier("BackButton")
+            .buttonStyle(PlainButtonStyle())
             .allowsHitTesting(true)
-            .zIndex(1000)
+            .zIndex(9999)
             
             Spacer()
             
@@ -112,6 +115,8 @@ struct ResultsView: View {
         .padding(.horizontal, 24)
         .padding(.top, 12)
         .padding(.bottom, 8)
+        .zIndex(9999)
+        .allowsHitTesting(true)
     }
     
     // MARK: - Photo with Media Player Section - Matching React
@@ -273,6 +278,8 @@ struct ResultsView: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .background(mediaPlayerBackground)
+        .allowsHitTesting(true)
+        .zIndex(100)
     }
     
     // MARK: - Background Components
