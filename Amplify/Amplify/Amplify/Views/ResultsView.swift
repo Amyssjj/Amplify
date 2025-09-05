@@ -150,7 +150,7 @@ struct ResultsView: View {
                     VStack {
                         Spacer()
                         mediaPlayerOverlay(duration: recording.duration)
-                            .padding(.bottom, 12)
+                            .padding(.bottom, 4)
                             .padding(.horizontal, 12)
                     }
                 }
@@ -158,7 +158,7 @@ struct ResultsView: View {
             }
         }
         .padding(.horizontal, 24)
-        .padding(.bottom, 16)
+        .padding(.bottom, 12)
     }
     
     // MARK: - Swipeable Cards Section - Matching React
@@ -203,7 +203,7 @@ struct ResultsView: View {
                 )
                 .animation(.spring(response: 0.6, dampingFraction: 0.8), value: selectedCardIndex)
             }
-            .frame(height: 400) // Expanded height for better content display
+            .frame(height: 450) // Further expanded height for better transcription display
             
             // Card indicator dots - matching React style
             HStack(spacing: 8) {
