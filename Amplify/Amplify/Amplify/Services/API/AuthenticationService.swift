@@ -51,6 +51,25 @@ struct User: Codable, Equatable {
         self.name = authUser.name
         self.profileImageURL = authUser.picture
     }
+
+    // MARK: - Computed Properties
+
+    var displayName: String {
+        return name ?? email.components(separatedBy: "@").first ?? "User"
+    }
+
+    var initials: String {
+        let components = (name ?? email).components(separatedBy: " ")
+        if components.count >= 2 {
+            return String(components[0].prefix(1) + components[1].prefix(1)).uppercased()
+        } else {
+            return String(components[0].prefix(2)).uppercased()
+        }
+    }
+
+    var hasProfileImage: Bool {
+        return profileImageURL != nil && !profileImageURL!.isEmpty
+    }
 }
 
 // MARK: - Authentication Service Implementation
@@ -210,17 +229,23 @@ class AuthenticationService: ObservableObject, AuthenticationServiceProtocol {
 
         print("🔵 Token expires in \(expiresIn) seconds (~\(expiresIn/3600) hours)")
 
-        // Store in keychain
-        try await tokenStorage.storeTokens(
-            accessToken: authResponse.accessToken,
-            expiration: expirationDate,
-            user: user
-        )
-
-        // Update local state
+        // Update local state first
         _currentToken = authResponse.accessToken
         tokenExpirationDate = expirationDate
         currentUser = user
+
+        // Try to store in keychain, but don't fail auth if storage fails
+        do {
+            try await tokenStorage.storeTokens(
+                accessToken: authResponse.accessToken,
+                expiration: expirationDate,
+                user: user
+            )
+            print("✅ Successfully stored authentication data")
+        } catch {
+            print("⚠️ Failed to store authentication data: \(error.localizedDescription)")
+            // Authentication still succeeds even if storage fails
+        }
     }
 
     private func refreshToken() async -> Bool {
@@ -229,9 +254,14 @@ class AuthenticationService: ObservableObject, AuthenticationServiceProtocol {
 
         print("🔴 Token refresh failed - user needs to re-authenticate")
 
-        // Clear the expired token
+        // Clear the expired token and reset authentication state
         _currentToken = nil
         tokenExpirationDate = nil
+        currentUser = nil
+        authenticationState = .unauthenticated
+
+        // Clear from storage as well
+        await tokenStorage.clearTokens()
 
         // Return false to indicate refresh failed
         return false

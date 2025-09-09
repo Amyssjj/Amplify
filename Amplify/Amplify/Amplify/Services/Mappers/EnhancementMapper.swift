@@ -104,7 +104,7 @@ struct EnhancementMapper {
 
             return AIInsight(
                 id: insightId,
-                title: key,  // Use the API-provided title directly
+                title: generateInsightTitle(from: key, description: value),
                 category: category,
                 description: value,
                 suggestion: extractSuggestionFromDescription(value),
@@ -116,9 +116,32 @@ struct EnhancementMapper {
     private static func determineCategoryFromContent(title: String, description: String)
         -> AIInsightCategory
     {
+        let lowerTitle = title.lowercased()
         let combinedText = "\(title) \(description)".lowercased()
 
-        // Analyze content to determine the most appropriate category
+        // First, try direct key matching for exact API keys
+        switch lowerTitle {
+        case "framework":
+            return .framework
+        case "vocabulary":
+            return .vocabulary
+        case "technique":
+            return .technique
+        case "pacing":
+            return .pacing
+        case "structure":
+            return .structure
+        case "engagement":
+            return .engagement
+        case "clarity":
+            return .clarity
+        case "emotion":
+            return .emotion
+        default:
+            break
+        }
+
+        // If no direct match, analyze content to determine the most appropriate category
         let emotionKeywords = [
             "feeling", "emotion", "vivid", "charm", "picture", "scene", "atmosphere", "mood",
         ]
@@ -153,6 +176,36 @@ struct EnhancementMapper {
 
         // Return the category with the highest score, or default to technique
         return scores.max(by: { $0.value < $1.value })?.key ?? AIInsightCategory.technique
+    }
+
+    private static func generateInsightTitle(from key: String, description: String) -> String {
+        let lowerDescription = description.lowercased()
+
+        // Analyze sentiment to determine if this is a strength or opportunity
+        let strengthIndicators = [
+            "strong", "excellent", "good", "great", "well", "clear", "engaging", "vivid",
+        ]
+        let opportunityIndicators = [
+            "consider", "weak", "could", "might", "improve", "better", "enhance",
+        ]
+
+        let hasStrengthIndicators = strengthIndicators.contains { lowerDescription.contains($0) }
+        let hasOpportunityIndicators = opportunityIndicators.contains {
+            lowerDescription.contains($0)
+        }
+
+        // Capitalize the key for display
+        let capitalizedKey = key.capitalized
+
+        if hasStrengthIndicators && !hasOpportunityIndicators {
+            return "\(capitalizedKey) Strength"
+        } else if hasOpportunityIndicators && !hasStrengthIndicators {
+            return "\(capitalizedKey) Opportunity"
+        } else {
+            // If mixed or unclear sentiment, default based on context
+            return hasStrengthIndicators
+                ? "\(capitalizedKey) Strength" : "\(capitalizedKey) Opportunity"
+        }
     }
 
     private static func extractSuggestionFromDescription(_ description: String) -> String? {
