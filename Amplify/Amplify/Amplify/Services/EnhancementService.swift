@@ -42,7 +42,13 @@ class EnhancementService: ObservableObject, EnhancementServiceProtocol {
     // MARK: - Computed Properties
     
     var isAuthenticated: Bool {
-        return authService.currentToken != nil && authService.isTokenValid()
+        // Check if we have both authenticated state AND a valid token
+        switch authService.authenticationState {
+        case .authenticated(_):
+            return authService.currentToken != nil && authService.isTokenValid()
+        default:
+            return false
+        }
     }
     
     var currentUser: User? {

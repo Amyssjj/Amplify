@@ -220,6 +220,11 @@ class AppStateManager: ObservableObject {
             }
             
         } catch {
+            print("🔴 Enhancement failed with error: \(error)")
+            print("🔴 Error type: \(type(of: error))")
+            if let apiError = error as? APIError {
+                print("🔴 API Error details: \(apiError)")
+            }
             handleError(.enhancementFailed)
             throw error
         }

@@ -72,7 +72,16 @@ class AuthenticationService: ObservableObject, AuthenticationServiceProtocol {
     // MARK: - Computed Properties
     
     var currentToken: String? {
-        guard isTokenValid() else { return nil }
+        let isValid = isTokenValid()
+        print("🔵 currentToken requested - isValid: \(isValid), hasToken: \(_currentToken != nil)")
+        if let expiration = tokenExpirationDate {
+            print("🔵 Token expiration: \(expiration), now: \(Date())")
+        }
+        guard isValid else { 
+            print("🔴 Token invalid - returning nil")
+            return nil 
+        }
+        print("🔵 Returning valid token")
         return _currentToken
     }
     
@@ -170,12 +179,17 @@ class AuthenticationService: ObservableObject, AuthenticationServiceProtocol {
                 
                 if isTokenValid() {
                     authenticationState = .authenticated(storedUser)
+                    print("✅ Restored valid authentication state")
                 } else {
-                    // Token expired, try to refresh
-                    let refreshSuccess = await refreshToken()
-                    if !refreshSuccess {
-                        await signOut()
-                    }
+                    // Token expired - need to clear auth state completely
+                    print("🔴 Stored token expired - signing out user")
+                    _currentToken = nil
+                    tokenExpirationDate = nil
+                    currentUser = nil
+                    authenticationState = .unauthenticated
+                    
+                    // Clear from storage too
+                    try? await tokenStorage.clearTokens()
                 }
             }
         } catch {
@@ -187,9 +201,12 @@ class AuthenticationService: ObservableObject, AuthenticationServiceProtocol {
     private func storeAuthenticationData(_ authResponse: AuthResponse) async throws {
         let user = User(from: authResponse.user)
         
-        // Calculate expiration date
-        let expiresIn = authResponse.expiresIn ?? 3600 // Default to 1 hour
+        // Use the actual expiration time from backend for now
+        // TODO: Implement proper refresh token flow for longer sessions
+        let expiresIn = authResponse.expiresIn ?? 3600 // Backend default (1 hour)
         let expirationDate = Date().addingTimeInterval(TimeInterval(expiresIn))
+        
+        print("🔵 Token expires in \(expiresIn) seconds (~\(expiresIn/3600) hours)")
         
         // Store in keychain
         try await tokenStorage.storeTokens(
@@ -205,12 +222,16 @@ class AuthenticationService: ObservableObject, AuthenticationServiceProtocol {
     }
     
     private func refreshToken() async -> Bool {
-        // For now, JWT tokens typically don't have refresh tokens
-        // This would depend on your backend implementation
-        // For simplicity, we'll return false and require re-authentication
+        // JWT tokens from Google don't support refresh without user interaction
+        // Clear expired token and require re-authentication
         
-        print("Token refresh not implemented - user will need to re-authenticate")
-        await signOut()
+        print("🔴 Token refresh failed - user needs to re-authenticate")
+        
+        // Clear the expired token
+        _currentToken = nil
+        tokenExpirationDate = nil
+        
+        // Return false to indicate refresh failed
         return false
     }
 }

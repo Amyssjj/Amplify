@@ -159,9 +159,33 @@ class APIClient: ObservableObject, APIClientProtocol {
         
         // Add authentication if required
         if requiresAuth {
-            guard let token = authService.currentToken else {
-                throw APIError.unauthorized("No authentication token available")
+            print("🔵 Authentication required for API call")
+            print("🔵 AuthService type: \(type(of: authService))")
+            
+            var authToken: String?
+            
+            if let token = authService.currentToken {
+                print("🔵 Got token from authService.currentToken")
+                authToken = token
+            } else {
+                print("🔴 No token from authService.currentToken - trying refresh")
+                // Try to refresh token first
+                let refreshed = await authService.refreshTokenIfNeeded()
+                print("🔵 Token refresh result: \(refreshed)")
+                if refreshed {
+                    authToken = authService.currentToken
+                    print("🔵 Got token after refresh: \(authToken != nil)")
+                } else {
+                    print("🔴 Token refresh failed")
+                }
             }
+            
+            guard let token = authToken else {
+                print("🔴 No valid authentication token available")
+                throw APIError.unauthorized("Authentication required - please sign in again")
+            }
+            
+            print("🔵 Adding Bearer token to Authorization header")
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
         

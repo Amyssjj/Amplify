@@ -20,6 +20,7 @@ struct RecordingView: View {
     @State private var isTransitioning = false
     
     private let maxRecordingDuration: TimeInterval = 60.0
+    private let minimumRecordingDuration: TimeInterval = 1.0
     private let bottomSheetOverlap: CGFloat = 24
     
     var body: some View {
@@ -326,7 +327,20 @@ struct RecordingView: View {
     private func stopRecording() {
         guard recordingStarted else { return }
         
-        // Haptic feedback
+        // Check minimum duration first (prevent accidental taps)
+        if appState.currentRecordingDuration < minimumRecordingDuration {
+            returnToHome()
+            return
+        }
+        
+        // Check for actual transcript content
+        let trimmedTranscript = currentTranscript.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedTranscript.isEmpty else {
+            returnToHome()
+            return
+        }
+        
+        // Haptic feedback for valid recording
         let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
         impactFeedback.impactOccurred()
         
@@ -347,6 +361,30 @@ struct RecordingView: View {
             
         case .failure(_):
             appState.handleError(.audioProcessingFailed)
+        }
+    }
+    
+    private func returnToHome() {
+        guard !isTransitioning else { return }
+        
+        isTransitioning = true
+        
+        // Light haptic feedback
+        let lightImpact = UIImpactFeedbackGenerator(style: .light)
+        lightImpact.impactOccurred()
+        
+        // Clean up services
+        speechService.stopLiveRecognition()
+        audioService.cancelRecording()
+        
+        // Smooth transition back to home
+        withAnimation(.interpolatingSpring(stiffness: 200, damping: 35)) {
+            appState.returnToHome()
+        }
+        
+        // Reset states
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            isTransitioning = false
         }
     }
     
