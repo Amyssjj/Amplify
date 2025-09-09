@@ -5,29 +5,29 @@
 //  Tests for model mapping between API and app models
 //
 
-import XCTest
 import Foundation
+import XCTest
 
 @testable import Amplify
 
 class ModelMapperTests: XCTestCase {
-    
+
     var mapperService: ModelMapperService!
-    
+
     @MainActor
     override func setUp() {
         super.setUp()
         mapperService = ModelMapperService()
     }
-    
+
     @MainActor
     override func tearDown() {
         mapperService = nil
         super.tearDown()
     }
-    
+
     // MARK: - Enhancement Mapping Tests
-    
+
     @MainActor
     func testMapEnhancementResponseToRecording() async throws {
         // Setup
@@ -38,39 +38,43 @@ class ModelMapperTests: XCTestCase {
             photoURL: "photo.jpg",
             timestamp: Date()
         )
-        
+
         let enhancementResponse = EnhancementTextResponse(
             enhancementId: "enh_123456",
             enhancedTranscript: "This is an enhanced and improved story with better vocabulary.",
             insights: [
                 "framework": "Clear narrative structure with strong beginning and end",
                 "vocabulary": "Rich, descriptive language enhances the storytelling",
-                "pacing": "Good rhythm and flow throughout the narrative"
+                "pacing": "Good rhythm and flow throughout the narrative",
             ]
         )
-        
+
         // Execute
         let updatedRecording = await mapperService.mapEnhancementResponse(
             enhancementResponse,
             to: originalRecording
         )
-        
+
         // Verify
-        XCTAssertEqual(updatedRecording.enhancedTranscript, "This is an enhanced and improved story with better vocabulary.")
+        XCTAssertEqual(
+            updatedRecording.enhancedTranscript,
+            "This is an enhanced and improved story with better vocabulary.")
         XCTAssertEqual(updatedRecording.insights.count, 3)
-        
+
         // Verify insight categories mapped correctly
         let categories = updatedRecording.insights.map { $0.category }
         XCTAssertTrue(categories.contains(.framework))
         XCTAssertTrue(categories.contains(.vocabulary))
         XCTAssertTrue(categories.contains(.pacing))
-        
+
         // Verify insight content
         let frameworkInsight = updatedRecording.insights.first { $0.category == .framework }
         XCTAssertNotNil(frameworkInsight)
-        XCTAssertEqual(frameworkInsight?.description, "Clear narrative structure with strong beginning and end")
+        XCTAssertEqual(
+            frameworkInsight?.description, "Clear narrative structure with strong beginning and end"
+        )
     }
-    
+
     @MainActor
     func testMapEnhancementDetailsToRecording() async throws {
         // Setup
@@ -81,7 +85,7 @@ class ModelMapperTests: XCTestCase {
             photoURL: "photo.jpg",
             timestamp: Date()
         )
-        
+
         let enhancementDetails = EnhancementDetails(
             enhancementId: "enh_789",
             createdAt: Date(),
@@ -89,27 +93,27 @@ class ModelMapperTests: XCTestCase {
             enhancedTranscript: "Enhanced and detailed story",
             insights: [
                 "structure": "Well-organized narrative flow",
-                "emotion": "Strong emotional impact"
+                "emotion": "Strong emotional impact",
             ],
             audioStatus: .ready,
             photoBase64: nil
         )
-        
+
         // Execute
         let updatedRecording = await mapperService.mapEnhancementDetails(
             enhancementDetails,
             to: originalRecording
         )
-        
+
         // Verify
         XCTAssertEqual(updatedRecording.enhancedTranscript, "Enhanced and detailed story")
         XCTAssertEqual(updatedRecording.insights.count, 2)
-        
+
         let emotionInsight = updatedRecording.insights.first { $0.category == .emotion }
         XCTAssertNotNil(emotionInsight)
         XCTAssertEqual(emotionInsight?.description, "Strong emotional impact")
     }
-    
+
     @MainActor
     func testCreateEnhancementRequestFromRecording() {
         // Setup
@@ -120,23 +124,23 @@ class ModelMapperTests: XCTestCase {
             photoURL: "test.jpg",
             timestamp: Date()
         )
-        
+
         let photoData = "test_photo_data".data(using: .utf8)!
-        
+
         // Execute
         let request = mapperService.createEnhancementRequest(
             from: recording,
             with: photoData
         )
-        
+
         // Verify
         XCTAssertEqual(request.transcript, "Test story content")
-        XCTAssertEqual(request.photoBase64, photoData)
+        XCTAssertEqual(request.photoBase64, photoData.base64EncodedString())
         XCTAssertEqual(request.language, "en")
     }
-    
+
     // MARK: - Insight Mapping Tests
-    
+
     @MainActor
     func testInsightCategoryMapping() async {
         // Setup
@@ -147,7 +151,7 @@ class ModelMapperTests: XCTestCase {
             photoURL: "photo.jpg",
             timestamp: Date()
         )
-        
+
         let response = EnhancementTextResponse(
             enhancementId: "enh_test",
             enhancedTranscript: "Enhanced text",
@@ -159,16 +163,16 @@ class ModelMapperTests: XCTestCase {
                 "structure": "Structure insight",
                 "engagement": "Engagement insight",
                 "clarity": "Clarity insight",
-                "emotion": "Emotion insight"
+                "emotion": "Emotion insight",
             ]
         )
-        
+
         // Execute
         let updated = await mapperService.mapEnhancementResponse(response, to: recording)
-        
+
         // Verify all categories mapped
         XCTAssertEqual(updated.insights.count, 8)
-        
+
         let categories = Set(updated.insights.map { $0.category })
         XCTAssertTrue(categories.contains(.framework))
         XCTAssertTrue(categories.contains(.vocabulary))
@@ -179,7 +183,7 @@ class ModelMapperTests: XCTestCase {
         XCTAssertTrue(categories.contains(.clarity))
         XCTAssertTrue(categories.contains(.emotion))
     }
-    
+
     @MainActor
     func testInsightTitleGeneration() async {
         // Setup
@@ -190,33 +194,33 @@ class ModelMapperTests: XCTestCase {
             photoURL: "photo.jpg",
             timestamp: Date()
         )
-        
+
         let response = EnhancementTextResponse(
             enhancementId: "enh_test",
             enhancedTranscript: "Enhanced",
             insights: [
                 "vocabulary": "Strong and excellent word choices",
                 "pacing": "Consider improving the rhythm",
-                "clarity": "Weak clarity in some sections"
+                "clarity": "Weak clarity in some sections",
             ]
         )
-        
+
         // Execute
         let updated = await mapperService.mapEnhancementResponse(response, to: recording)
-        
+
         // Verify titles generated correctly
         let vocabInsight = updated.insights.first { $0.category == .vocabulary }
         XCTAssertTrue(vocabInsight?.title.contains("Strength") ?? false)
-        
+
         let pacingInsight = updated.insights.first { $0.category == .pacing }
         XCTAssertTrue(pacingInsight?.title.contains("Opportunity") ?? false)
-        
+
         let clarityInsight = updated.insights.first { $0.category == .clarity }
         XCTAssertTrue(clarityInsight?.title.contains("Opportunity") ?? false)
     }
-    
+
     // MARK: - User Mapping Tests
-    
+
     @MainActor
     func testMapAuthResponseToUser() {
         // Setup
@@ -231,17 +235,17 @@ class ModelMapperTests: XCTestCase {
                 picture: "https://example.com/avatar.jpg"
             )
         )
-        
+
         // Execute
         let user = mapperService.mapAuthenticationResponse(authResponse)
-        
+
         // Verify
         XCTAssertEqual(user.id, "user_123")
         XCTAssertEqual(user.email, "test@example.com")
         XCTAssertEqual(user.name, "Test User")
         XCTAssertEqual(user.profileImageURL, "https://example.com/avatar.jpg")
     }
-    
+
     @MainActor
     func testUserDisplayProperties() {
         // Setup
@@ -251,14 +255,14 @@ class ModelMapperTests: XCTestCase {
             name: "John Doe",
             picture: nil
         )
-        
+
         let user = User(from: authUser)
-        
+
         // Verify display properties
         XCTAssertEqual(user.displayName, "John Doe")
         XCTAssertEqual(user.initials, "JD")
         XCTAssertFalse(user.hasProfileImage)
-        
+
         // Test user without name
         let authUserNoName = AuthResponseUser(
             userId: "user_789",
@@ -266,14 +270,14 @@ class ModelMapperTests: XCTestCase {
             name: nil,
             picture: nil
         )
-        
+
         let userNoName = User(from: authUserNoName)
         XCTAssertEqual(userNoName.displayName, "jane")
         XCTAssertEqual(userNoName.initials, "JA")
     }
-    
+
     // MARK: - Historical Data Mapping Tests
-    
+
     @MainActor
     func testMapHistoricalEnhancements() {
         // Setup
@@ -283,30 +287,30 @@ class ModelMapperTests: XCTestCase {
             transcriptPreview: "Preview of first story...",
             audioStatus: .ready
         )
-        
+
         let summary2 = EnhancementSummary(
             enhancementId: "enh_002",
             createdAt: Date().addingTimeInterval(-3600),
             transcriptPreview: "Preview of second story...",
             audioStatus: .notGenerated
         )
-        
+
         let response = GetEnhancements200Response(
             total: 2,
             items: [summary1, summary2]
         )
-        
+
         // Execute
         let recordings = mapperService.mapHistoricalEnhancements(response)
-        
+
         // Verify
         XCTAssertEqual(recordings.count, 2)
         XCTAssertEqual(recordings[0].transcript, "Preview of first story...")
         XCTAssertEqual(recordings[1].transcript, "Preview of second story...")
     }
-    
+
     // MARK: - Validation Tests
-    
+
     @MainActor
     func testValidateEnhancementResponse() {
         // Valid response
@@ -315,45 +319,45 @@ class ModelMapperTests: XCTestCase {
             enhancedTranscript: "Enhanced content",
             insights: ["key": "value"]
         )
-        
+
         XCTAssertTrue(mapperService.validateEnhancementResponse(validResponse))
-        
+
         // Invalid responses
         let invalidResponse1 = EnhancementTextResponse(
             enhancementId: "",
             enhancedTranscript: "Enhanced content",
             insights: [:]
         )
-        
+
         XCTAssertFalse(mapperService.validateEnhancementResponse(invalidResponse1))
-        
+
         let invalidResponse2 = EnhancementTextResponse(
             enhancementId: "enh_123",
             enhancedTranscript: "",
             insights: [:]
         )
-        
+
         XCTAssertFalse(mapperService.validateEnhancementResponse(invalidResponse2))
     }
-    
+
     @MainActor
     func testValidateInsights() {
         // Valid insights
         let validInsights = [
             "framework": "Good structure",
-            "vocabulary": "Rich language"
+            "vocabulary": "Rich language",
         ]
-        
+
         XCTAssertTrue(mapperService.hasValidInsights(validInsights))
-        
+
         // Invalid insights
         XCTAssertFalse(mapperService.hasValidInsights([:]))
         XCTAssertFalse(mapperService.hasValidInsights(["key": ""]))
         XCTAssertFalse(mapperService.hasValidInsights(["key": "   "]))
     }
-    
+
     // MARK: - Error Handling Tests
-    
+
     @MainActor
     func testSafelyMapEnhancementWithError() async {
         // Setup
@@ -364,7 +368,7 @@ class ModelMapperTests: XCTestCase {
             photoURL: "photo.jpg",
             timestamp: Date()
         )
-        
+
         // Test nil response
         do {
             _ = try await mapperService.safelyMapEnhancement(nil, to: recording)
@@ -378,14 +382,14 @@ class ModelMapperTests: XCTestCase {
         } catch {
             XCTFail("Unexpected error type")
         }
-        
+
         // Test invalid response
         let invalidResponse = EnhancementTextResponse(
             enhancementId: "",
             enhancedTranscript: "",
             insights: [:]
         )
-        
+
         do {
             _ = try await mapperService.safelyMapEnhancement(invalidResponse, to: recording)
             XCTFail("Expected error for invalid response")
@@ -399,9 +403,9 @@ class ModelMapperTests: XCTestCase {
             XCTFail("Unexpected error type")
         }
     }
-    
+
     // MARK: - Audio Response Tests
-    
+
     @MainActor
     func testProcessAudioResponse() {
         // Setup
@@ -410,10 +414,10 @@ class ModelMapperTests: XCTestCase {
             audioBase64: audioData,
             audioFormat: .mp3
         )
-        
+
         // Execute
         let processedData = mapperService.processAudioResponse(audioResponse)
-        
+
         // Verify
         XCTAssertEqual(processedData, audioData)
     }
