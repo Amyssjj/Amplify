@@ -12,16 +12,19 @@ class AppStateManagerTests: XCTestCase {
     
     var appState: AppStateManager!
     
+    @MainActor
     override func setUp() {
         super.setUp()
         appState = AppStateManager()
     }
     
+    @MainActor
     override func tearDown() {
         appState = nil
         super.tearDown()
     }
     
+    @MainActor
     func testInitialState() {
         // Then
         XCTAssertEqual(appState.currentScreen, .home)
@@ -31,6 +34,7 @@ class AppStateManagerTests: XCTestCase {
         XCTAssertNil(appState.currentPhoto)
     }
     
+    @MainActor
     func testTransitionToRecordingScreen() {
         // Given
         let photoData = PhotoData(
@@ -47,6 +51,7 @@ class AppStateManagerTests: XCTestCase {
         XCTAssertEqual(appState.currentPhoto?.identifier, "test-photo")
     }
     
+    @MainActor
     func testStartRecording() {
         // Given
         let photoData = PhotoData(image: UIImage(), identifier: "test", isFromUserLibrary: true)
@@ -60,6 +65,7 @@ class AppStateManagerTests: XCTestCase {
         XCTAssertNotNil(appState.recordingStartTime)
     }
     
+    @MainActor
     func testStopRecording() {
         // Given
         let photoData = PhotoData(image: UIImage(), identifier: "test", isFromUserLibrary: true)
@@ -84,6 +90,7 @@ class AppStateManagerTests: XCTestCase {
         XCTAssertNil(appState.recordingStartTime)
     }
     
+    @MainActor
     func testTransitionToResults() async {
         // Given
         let recording = Recording(
@@ -109,6 +116,7 @@ class AppStateManagerTests: XCTestCase {
         XCTAssertEqual(appState.currentRecording?.insights.count, 1)
     }
     
+    @MainActor
     func testReturnToHome() {
         // Given
         appState.currentScreen = .results
@@ -131,10 +139,11 @@ class AppStateManagerTests: XCTestCase {
         XCTAssertFalse(appState.isProcessing)
     }
     
+    @MainActor
     func testPermissionStates() {
         // When/Then
         XCTAssertEqual(appState.photoPermissionStatus, .notDetermined)
-        XCTAssertEqual(appState.microphonePermissionStatus, .notDetermined)
+        XCTAssertEqual(appState.microphonePermissionStatus, .undetermined)
         XCTAssertEqual(appState.speechPermissionStatus, .notDetermined)
         
         // When
@@ -149,6 +158,7 @@ class AppStateManagerTests: XCTestCase {
         XCTAssertTrue(appState.hasAllPermissions)
     }
     
+    @MainActor
     func testPermissionDeniedStates() {
         // When
         appState.updatePhotoPermissionStatus(.denied)
@@ -160,6 +170,7 @@ class AppStateManagerTests: XCTestCase {
         XCTAssertTrue(appState.hasAnyPermissionDenied)
     }
     
+    @MainActor
     func testErrorHandling() {
         // When
         let error = AppError.recordingFailed
@@ -170,6 +181,7 @@ class AppStateManagerTests: XCTestCase {
         XCTAssertTrue(appState.showingError)
     }
     
+    @MainActor
     func testClearError() {
         // Given
         appState.handleError(.recordingFailed)
@@ -182,6 +194,7 @@ class AppStateManagerTests: XCTestCase {
         XCTAssertFalse(appState.showingError)
     }
     
+    @MainActor
     func testRecordingDurationTracking() {
         // Given
         appState.startRecording()
@@ -195,6 +208,7 @@ class AppStateManagerTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(duration, 0)
     }
     
+    @MainActor
     func testCanRecordState() {
         // Given - No permissions
         XCTAssertFalse(appState.canRecord)
@@ -213,6 +227,7 @@ class AppStateManagerTests: XCTestCase {
         XCTAssertFalse(appState.canRecord)
     }
     
+    @MainActor
     func testProcessingStateManagement() {
         // When
         appState.setProcessing(true, progress: 0.5)

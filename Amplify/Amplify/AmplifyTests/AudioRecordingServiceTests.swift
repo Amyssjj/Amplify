@@ -13,16 +13,19 @@ class AudioRecordingServiceTests: XCTestCase {
     
     var audioService: AudioRecordingService!
     
+    @MainActor
     override func setUp() {
         super.setUp()
         audioService = AudioRecordingService()
     }
     
+    @MainActor
     override func tearDown() {
         audioService = nil
         super.tearDown()
     }
     
+    @MainActor
     func testRequestMicrophonePermission() async {
         // When
         let permission = await audioService.requestMicrophonePermission()
@@ -35,6 +38,7 @@ class AudioRecordingServiceTests: XCTestCase {
         ].contains(permission))
     }
     
+    @MainActor
     func testPrepareForRecording() async {
         // Given
         audioService.mockPermissionStatus = .authorized
@@ -51,6 +55,7 @@ class AudioRecordingServiceTests: XCTestCase {
         }
     }
     
+    @MainActor
     func testPrepareForRecordingWhenPermissionDenied() async {
         // Given
         audioService.mockPermissionStatus = .denied
@@ -67,6 +72,7 @@ class AudioRecordingServiceTests: XCTestCase {
         }
     }
     
+    @MainActor
     func testStartRecording() async throws {
         // Given
         audioService.mockPermissionStatus = .authorized
@@ -86,6 +92,7 @@ class AudioRecordingServiceTests: XCTestCase {
         }
     }
     
+    @MainActor
     func testStopRecording() async throws {
         // Given
         audioService.mockPermissionStatus = .authorized
@@ -106,6 +113,7 @@ class AudioRecordingServiceTests: XCTestCase {
         }
     }
     
+    @MainActor
     func testRecordingDurationTracking() async throws {
         // Given
         audioService.mockPermissionStatus = .authorized
@@ -121,6 +129,7 @@ class AudioRecordingServiceTests: XCTestCase {
         XCTAssertGreaterThan(duration, 0)
     }
     
+    @MainActor
     func testMaxRecordingDurationLimit() async throws {
         // Given
         audioService.mockPermissionStatus = .authorized
@@ -137,6 +146,7 @@ class AudioRecordingServiceTests: XCTestCase {
         XCTAssertFalse(audioService.isRecording)
     }
     
+    @MainActor
     func testCancelRecording() async throws {
         // Given
         audioService.mockPermissionStatus = .authorized
@@ -151,6 +161,7 @@ class AudioRecordingServiceTests: XCTestCase {
         XCTAssertNil(audioService.currentRecordingURL)
     }
     
+    @MainActor
     func testCleanupAfterRecording() async throws {
         // Given
         audioService.mockPermissionStatus = .authorized
@@ -166,6 +177,7 @@ class AudioRecordingServiceTests: XCTestCase {
         XCTAssertNil(audioService.currentRecordingURL)
     }
     
+    @MainActor
     func testAudioSessionConfiguration() async {
         // Given
         audioService.mockPermissionStatus = .authorized
@@ -184,6 +196,7 @@ class AudioRecordingServiceTests: XCTestCase {
         }
     }
     
+    @MainActor
     func testRecordingQualitySettings() {
         // When
         let settings = audioService.getRecordingSettings()

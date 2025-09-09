@@ -9,8 +9,19 @@ import Foundation
 import Photos
 import UIKit
 
+// MARK: - Photo Library Service Protocol
+
+protocol PhotoLibraryServiceProtocol: ObservableObject {
+    func requestPhotoLibraryPermission() async -> PhotoLibraryPermissionStatus
+    func fetchFavoritesAlbum() async -> Result<PHAssetCollection, PhotoLibraryError>
+    func getRandomPhotoFromFavorites() async -> Result<PhotoData, PhotoLibraryError>
+    func getFallbackPhoto() -> PhotoData
+}
+
+// MARK: - Photo Library Service Implementation
+
 @MainActor
-class PhotoLibraryService: ObservableObject {
+class PhotoLibraryService: ObservableObject, PhotoLibraryServiceProtocol {
     
     // MARK: - Testing Support
     var mockPermissionStatus: PhotoLibraryPermissionStatus?

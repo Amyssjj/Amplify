@@ -64,7 +64,7 @@ struct ContentView: View {
                     insertion: customTransition(for: appState.currentScreen),
                     removal: customTransition(for: appState.currentScreen)
                 ))
-                .animation(.spring(response: 0.6, dampingFraction: 0.85, blendDuration: 0.1), value: appState.currentScreen)
+                .animation(.spring(response: 0.3, dampingFraction: 0.85, blendDuration: 0.05), value: appState.currentScreen)
             }
         }
         .alert(

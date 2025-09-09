@@ -8,8 +8,26 @@
 import Foundation
 import AVFoundation
 
+// MARK: - Audio Recording Service Protocol
+
+protocol AudioRecordingServiceProtocol: ObservableObject {
+    var isRecording: Bool { get }
+    var isPrepared: Bool { get }
+    var currentRecordingDuration: TimeInterval { get }
+    var maxRecordingDuration: TimeInterval { get set }
+    var currentRecordingURL: URL? { get }
+    
+    func requestMicrophonePermission() async -> MicrophonePermissionStatus
+    func prepareForRecording() async -> Result<Void, AudioRecordingError>
+    func startRecording() -> Result<Void, AudioRecordingError>
+    func stopRecording() -> Result<AudioRecordingData, AudioRecordingError>
+    func cancelRecording()
+}
+
+// MARK: - Audio Recording Service Implementation
+
 @MainActor
-class AudioRecordingService: NSObject, ObservableObject {
+class AudioRecordingService: NSObject, ObservableObject, AudioRecordingServiceProtocol {
     
     // MARK: - Published Properties
     @Published var isRecording = false

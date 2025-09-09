@@ -13,16 +13,19 @@ class PhotoLibraryServiceTests: XCTestCase {
     
     var photoService: PhotoLibraryService!
     
+    @MainActor
     override func setUp() {
         super.setUp()
         photoService = PhotoLibraryService()
     }
     
+    @MainActor
     override func tearDown() {
         photoService = nil
         super.tearDown()
     }
     
+    @MainActor
     func testRequestPhotoLibraryPermission() async {
         // Given/When
         let permissionStatus = await photoService.requestPhotoLibraryPermission()
@@ -37,6 +40,7 @@ class PhotoLibraryServiceTests: XCTestCase {
         ].contains(permissionStatus))
     }
     
+    @MainActor
     func testFetchFavoritesAlbumWhenAuthorized() async throws {
         // Given
         photoService.mockPermissionStatus = .authorized
@@ -54,6 +58,7 @@ class PhotoLibraryServiceTests: XCTestCase {
         }
     }
     
+    @MainActor
     func testFetchFavoritesAlbumWhenDenied() async {
         // Given
         photoService.mockPermissionStatus = .denied
@@ -70,6 +75,7 @@ class PhotoLibraryServiceTests: XCTestCase {
         }
     }
     
+    @MainActor
     func testGetRandomPhotoFromFavorites() async {
         // Given
         photoService.mockPermissionStatus = .authorized
@@ -90,6 +96,7 @@ class PhotoLibraryServiceTests: XCTestCase {
         }
     }
     
+    @MainActor
     func testFallbackToRecentPhotosWhenFavoritesEmpty() async {
         // Given
         photoService.mockPermissionStatus = .authorized
@@ -110,6 +117,7 @@ class PhotoLibraryServiceTests: XCTestCase {
         }
     }
     
+    @MainActor
     func testGetFallbackPhoto() {
         // When
         let fallbackPhoto = photoService.getFallbackPhoto()
@@ -120,6 +128,7 @@ class PhotoLibraryServiceTests: XCTestCase {
         XCTAssertFalse(fallbackPhoto.isFromUserLibrary)
     }
     
+    @MainActor
     func testPhotoLibraryPermissionStatusMapping() {
         // Test mapping from PHAuthorizationStatus to our custom enum
         XCTAssertEqual(

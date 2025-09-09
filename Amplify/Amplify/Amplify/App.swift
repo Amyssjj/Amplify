@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import GoogleSignIn
 
 @main
 struct AmplifyApp: App {
@@ -16,6 +17,9 @@ struct AmplifyApp: App {
         
         // Initialize any required services
         initializeServices()
+        
+        // Configure Google Sign-In
+        configureGoogleSignIn()
     }
     
     var body: some Scene {
@@ -24,6 +28,10 @@ struct AmplifyApp: App {
                 .preferredColorScheme(.light) // Start with light mode
                 .onAppear {
                     // Additional setup if needed
+                }
+                .onOpenURL { url in
+                    // Handle Google Sign-In URL callbacks
+                    GIDSignIn.sharedInstance.handle(url)
                 }
         }
     }
@@ -57,6 +65,30 @@ struct AmplifyApp: App {
         
         #if DEBUG
         print("🚀 Amplify app starting in DEBUG mode")
+        #endif
+    }
+    
+    private func configureGoogleSignIn() {
+        // Load Google Sign-In configuration from GoogleService-Info.plist
+        guard let path = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist"),
+              let plist = NSDictionary(contentsOfFile: path),
+              let clientID = plist["CLIENT_ID"] as? String else {
+            
+            #if DEBUG
+            print("⚠️ GoogleService-Info.plist not found or CLIENT_ID missing")
+            print("🔧 Please add your GoogleService-Info.plist file to configure OAuth")
+            #endif
+            return
+        }
+        
+        // Configure Google Sign-In with client ID
+        let config = GIDConfiguration(clientID: clientID)
+        
+        GIDSignIn.sharedInstance.configuration = config
+        
+        #if DEBUG
+        print("✅ Google Sign-In configured successfully")
+        print("📱 Client ID: \(clientID)")
         #endif
     }
 }

@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import UIKit
 
 @MainActor
 class AppStateManager: ObservableObject {
@@ -15,6 +16,10 @@ class AppStateManager: ObservableObject {
     
     // Screen Navigation
     @Published var currentScreen: AppScreen = .home
+    
+    // Authentication State
+    @Published var authenticationState: AuthenticationState = .unauthenticated
+    @Published var currentUser: User?
     
     // Recording State
     @Published var isRecording = false
@@ -37,6 +42,42 @@ class AppStateManager: ObservableObject {
     @Published var currentError: AppError?
     @Published var showingError = false
     
+    // MARK: - API Integration
+    
+    private(set) var enhancementService: EnhancementService
+    private(set) var audioPlayerService: AudioPlayerService
+    
+    // MARK: - Initialization
+    
+    init() {
+        // Initialize enhancement service based on API configuration
+        // Handle circular dependency by creating APIClient first, then AuthService with APIClient
+        let tempAuthService = AuthenticationService() // Temporary for APIClient creation
+        let apiClient = APIClient(
+            baseURL: APIConfiguration.baseURL,
+            authService: tempAuthService
+        )
+        
+        // Create the final AuthenticationService with the APIClient
+        let sharedAuthService = AuthenticationService(apiClient: apiClient)
+        
+        self.enhancementService = EnhancementService(
+            apiClient: apiClient,
+            authService: sharedAuthService,
+            mapperService: ModelMapperService(),
+            networkManager: NetworkManager()
+        )
+        
+        // Initialize audio player service
+        self.audioPlayerService = AudioPlayerService(enhancementService: enhancementService)
+        
+        #if DEBUG
+        if APIConfiguration.FeatureFlags.enableDebugLogging {
+            APIConfiguration.printConfiguration()
+        }
+        #endif
+    }
+    
     // MARK: - Computed Properties
     
     var hasAllPermissions: Bool {
@@ -49,6 +90,14 @@ class AppStateManager: ObservableObject {
         return photoPermissionStatus == .denied ||
                microphonePermissionStatus == .denied ||
                speechPermissionStatus == .denied
+    }
+    
+    var isAuthenticated: Bool {
+        return enhancementService.isAuthenticated
+    }
+    
+    var requiresAuthentication: Bool {
+        return !isAuthenticated && currentScreen != .home
     }
     
     var canRecord: Bool {
@@ -102,6 +151,83 @@ class AppStateManager: ObservableObject {
         isProcessing = false
         recordingStartTime = nil
         processingProgress = 0.0
+    }
+    
+    // MARK: - Authentication Methods
+    
+    func signInWithGoogle(_ idToken: String) async throws {
+        do {
+            let user = try await enhancementService.signInWithGoogle(idToken: idToken)
+            currentUser = user
+            authenticationState = .authenticated(user)
+        } catch {
+            handleError(.authenticationFailed)
+            throw error
+        }
+    }
+    
+    func signOut() async {
+        await enhancementService.signOut()
+        currentUser = nil
+        authenticationState = .unauthenticated
+        
+        // Return to home if user was in authenticated screens
+        if currentScreen != .home {
+            returnToHome()
+        }
+    }
+    
+    // MARK: - Enhancement Methods
+    
+    func enhanceRecording(_ recording: Recording) async throws {
+        guard let photo = currentPhoto else {
+            throw AppError.photoDataMissing
+        }
+        
+        guard let photoData = await getPhotoData(for: photo) else {
+            throw AppError.photoProcessingFailed
+        }
+        
+        do {
+            let enhanced = try await enhancementService.enhanceRecording(
+                recording,
+                photoData: photoData
+            )
+            
+            // Update the current recording with enhanced data
+            currentRecording = enhanced
+            
+            // Transition to results immediately - don't wait for audio
+            await transitionToResults(with: enhanced.insights)
+            
+            // Preload audio in background after transitioning to results
+            if let enhancementId = enhanced.enhancementId {
+                Task {
+                    print("🔵 Background preloading audio for enhancement: \(enhancementId)")
+                    do {
+                        let audioData = try await enhancementService.getEnhancementAudio(
+                            for: enhanced, 
+                            enhancementId: enhancementId
+                        )
+                        // Setup audio player with the fetched data
+                        try await audioPlayerService.preloadAudio(with: audioData, enhancementId: enhancementId)
+                        print("✅ Audio preloaded successfully in background")
+                    } catch {
+                        print("🔴 Failed to preload audio: \(error)")
+                        // Audio loading failure doesn't affect user experience
+                    }
+                }
+            }
+            
+        } catch {
+            handleError(.enhancementFailed)
+            throw error
+        }
+    }
+    
+    private func getPhotoData(for photo: PhotoData) async -> Data? {
+        // Convert UIImage to JPEG data for API upload
+        return photo.image.jpegData(compressionQuality: 0.8)
     }
     
     // MARK: - Permission Management
@@ -168,6 +294,10 @@ enum AppError: Error, Equatable {
     case audioProcessingFailed
     case aiProcessingFailed
     case networkError
+    case authenticationFailed
+    case enhancementFailed
+    case photoDataMissing
+    case photoProcessingFailed
     case unknown
     
     var title: String {
@@ -186,6 +316,14 @@ enum AppError: Error, Equatable {
             return "AI Processing Failed"
         case .networkError:
             return "Network Error"
+        case .authenticationFailed:
+            return "Authentication Failed"
+        case .enhancementFailed:
+            return "Enhancement Failed"
+        case .photoDataMissing:
+            return "Photo Missing"
+        case .photoProcessingFailed:
+            return "Photo Processing Failed"
         case .unknown:
             return "Unknown Error"
         }
@@ -207,6 +345,14 @@ enum AppError: Error, Equatable {
             return "Unable to enhance your story. Please check your connection and try again."
         case .networkError:
             return "Please check your internet connection and try again."
+        case .authenticationFailed:
+            return "Unable to sign in. Please try again."
+        case .enhancementFailed:
+            return "Unable to enhance your story. Please check your connection and try again."
+        case .photoDataMissing:
+            return "Photo data is missing. Please select a photo again."
+        case .photoProcessingFailed:
+            return "Unable to process the selected photo. Please try again."
         case .unknown:
             return "An unexpected error occurred. Please try again."
         }

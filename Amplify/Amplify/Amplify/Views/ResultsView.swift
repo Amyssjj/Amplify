@@ -13,9 +13,21 @@ struct ResultsView: View {
     @State private var selectedCardIndex = 0 // 0 = transcript, 1 = insights
     @State private var showingTranscriptModal = false
     @State private var showingInsightModal = false
+    @State private var selectedInsight: AIInsight?
     @State private var isPlaying = false
     @State private var currentPlayTime: Double = 0
     @State private var dragOffset: CGFloat = 0
+    
+    // MARK: - Computed Properties
+    
+    private var progressRatio: CGFloat {
+        let actualDuration = appState.audioPlayerService.duration > 0 ? appState.audioPlayerService.duration : 1.0
+        return CGFloat(currentPlayTime / actualDuration)
+    }
+    
+    private var displayDuration: TimeInterval {
+        return appState.audioPlayerService.duration > 0 ? appState.audioPlayerService.duration : (appState.currentRecording?.duration ?? 0)
+    }
     
     var body: some View {
         ZStack {
@@ -37,20 +49,29 @@ struct ResultsView: View {
             }
         }
         .navigationBarHidden(true)
+        .onAppear {
+            // Sync UI state with AudioPlayerService
+            isPlaying = appState.audioPlayerService.isPlaying
+            currentPlayTime = appState.audioPlayerService.currentTime
+            
+            // Start progress updates if audio is already playing
+            if isPlaying {
+                startProgressUpdates()
+            }
+        }
         .sheet(isPresented: $showingTranscriptModal) {
             TranscriptModalView(
                 recording: appState.currentRecording,
                 isPresented: $showingTranscriptModal
             )
         }
-        .sheet(isPresented: $showingInsightModal) {
-            if let recording = appState.currentRecording,
-               !recording.insights.isEmpty {
-                InsightModalView(
-                    insight: recording.insights[0], // Show first insight for now
-                    isPresented: $showingInsightModal
-                )
-            }
+        .sheet(item: $selectedInsight) { insight in
+            InsightModalView(
+                insight: insight,
+                onDismiss: {
+                    selectedInsight = nil
+                }
+            )
         }
     }
     
@@ -60,7 +81,8 @@ struct ResultsView: View {
         HStack {
             // Back button - glass effect like React
             Button(action: { 
-                // Ensure back action works during playback
+                // Stop audio playback when leaving
+                appState.audioPlayerService.stop()
                 isPlaying = false
                 currentPlayTime = 0
                 appState.returnToHome() 
@@ -239,14 +261,16 @@ struct ResultsView: View {
                     // Progress track
                     RoundedRectangle(cornerRadius: 2)
                         .fill(Color.white)
-                        .frame(width: geometry.size.width * CGFloat(currentPlayTime / duration), height: 4)
+                        .frame(width: geometry.size.width * progressRatio, height: 4)
                 }
             }
             .frame(height: 4)
             // TODO: Add seek functionality later
             .onTapGesture {
                 // Simple tap to seek to middle for now
-                currentPlayTime = duration * 0.5
+                let seekTime = displayDuration * 0.5
+                appState.audioPlayerService.seek(to: seekTime)
+                currentPlayTime = seekTime
             }
             
             // Controls
@@ -269,7 +293,7 @@ struct ResultsView: View {
                 Spacer()
                 
                 // Duration display
-                Text(formatDuration(duration))
+                Text(formatDuration(displayDuration))
                     .font(.caption)
                     .foregroundColor(.white.opacity(0.8))
                     .monospacedDigit()
@@ -341,7 +365,12 @@ struct ResultsView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 8) {
                     if let recording = appState.currentRecording {
-                        Text(recording.transcript)
+                        // Display enhanced transcript if available, otherwise fall back to original
+                        let displayText = recording.enhancedTranscript?.isEmpty == false 
+                            ? recording.enhancedTranscript! 
+                            : recording.transcript
+                        
+                        Text(displayText)
                             .font(.body)
                             .foregroundColor(.primary)
                             .lineSpacing(4)
@@ -369,9 +398,6 @@ struct ResultsView: View {
         }
         .padding(20)
         .background(cardBackground)
-        .onTapGesture {
-            showingInsightModal = true
-        }
     }
     
     private var insightsHeaderView: some View {
@@ -423,6 +449,9 @@ struct ResultsView: View {
                     .opacity(0.3)
             }
         }
+        .onTapGesture {
+            selectedInsight = insight
+        }
     }
     
     // MARK: - Actions
@@ -433,23 +462,43 @@ struct ResultsView: View {
         let impactFeedback = UIImpactFeedbackGenerator(style: .light)
         impactFeedback.impactOccurred()
         
-        isPlaying.toggle()
+        guard let recording = appState.currentRecording else { return }
         
-        // TODO: Implement actual audio playback with time updates
-        if isPlaying {
-            // Simulate playback progress using Task for concurrency safety
-            Task { @MainActor in
-                while isPlaying, let recording = appState.currentRecording {
-                    // Use Task.sleep for non-blocking delay
-                    try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
-                    
-                    // Update on main thread
-                    currentPlayTime += 0.1
-                    if currentPlayTime >= recording.duration {
-                        currentPlayTime = recording.duration
-                        isPlaying = false
-                    }
+        if appState.audioPlayerService.isPlaying {
+            // Pause audio
+            appState.audioPlayerService.pause()
+            isPlaying = false
+        } else {
+            // Start or resume audio playback
+            Task {
+                await appState.audioPlayerService.loadAndPlay(recording: recording)
+                isPlaying = true
+                
+                // Update UI with actual audio progress
+                startProgressUpdates()
+            }
+        }
+    }
+    
+    private func startProgressUpdates() {
+        Task { @MainActor in
+            while appState.audioPlayerService.isPlaying {
+                try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+                
+                // Update progress from audio service
+                currentPlayTime = appState.audioPlayerService.currentTime
+                
+                // Check if audio has finished
+                if currentPlayTime >= appState.audioPlayerService.duration && appState.audioPlayerService.duration > 0 {
+                    currentPlayTime = 0
+                    isPlaying = false
+                    break
                 }
+            }
+            // Final sync when audio stops
+            isPlaying = appState.audioPlayerService.isPlaying
+            if !isPlaying {
+                currentPlayTime = 0
             }
         }
     }
@@ -532,7 +581,7 @@ struct TranscriptModalView: View {
 
 struct InsightModalView: View {
     let insight: AIInsight
-    @Binding var isPresented: Bool
+    let onDismiss: () -> Void
     
     var body: some View {
         NavigationView {
@@ -600,7 +649,7 @@ struct InsightModalView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
-                        isPresented = false
+                        onDismiss()
                     }
                 }
             }

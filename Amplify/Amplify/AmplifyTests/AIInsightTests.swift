@@ -10,6 +10,7 @@ import XCTest
 
 class AIInsightTests: XCTestCase {
     
+    @MainActor
     func testAIInsightInitialization() {
         // Given
         let id = UUID()
@@ -38,6 +39,7 @@ class AIInsightTests: XCTestCase {
         XCTAssertEqual(insight.confidence, confidence, accuracy: 0.01)
     }
     
+    @MainActor
     func testAIInsightCategoryTypes() {
         // Test all category types exist and are accessible
         let framework = AIInsightCategory.framework
@@ -53,6 +55,7 @@ class AIInsightTests: XCTestCase {
         XCTAssertNotNil(structure)
     }
     
+    @MainActor
     func testAIInsightWithHighStakeWords() {
         // Given
         let insight = AIInsight(
@@ -72,6 +75,7 @@ class AIInsightTests: XCTestCase {
         XCTAssertTrue(insight.highStakeWords.contains("breathtaking"))
     }
     
+    @MainActor
     func testAIInsightIsActionable() {
         // Given
         let actionableInsight = AIInsight(
@@ -94,6 +98,7 @@ class AIInsightTests: XCTestCase {
         XCTAssertFalse(nonActionableInsight.isActionable)
     }
     
+    @MainActor
     func testAIInsightEquality() {
         // Given
         let id = UUID()

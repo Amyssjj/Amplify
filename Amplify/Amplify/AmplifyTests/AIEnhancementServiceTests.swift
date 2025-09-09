@@ -12,16 +12,19 @@ class AIEnhancementServiceTests: XCTestCase {
     
     var aiService: AIEnhancementService!
     
+    @MainActor
     override func setUp() {
         super.setUp()
         aiService = AIEnhancementService()
     }
     
+    @MainActor
     override func tearDown() {
         aiService = nil
         super.tearDown()
     }
     
+    @MainActor
     func testEnhanceStoryTranscript() async throws {
         // Given
         let originalTranscript = "The sunset was nice. It was over the mountains."
@@ -65,6 +68,7 @@ class AIEnhancementServiceTests: XCTestCase {
         }
     }
     
+    @MainActor
     func testGenerateInsightsFromTranscript() async throws {
         // Given
         let transcript = "So yesterday I was walking through the park and I saw this amazing sunset. It was like, you know, really beautiful and made me think about life and stuff."
@@ -105,6 +109,7 @@ class AIEnhancementServiceTests: XCTestCase {
         }
     }
     
+    @MainActor
     func testAnalyzeStoryStructure() async throws {
         // Given
         let transcript = "First, I entered the office. Then, I met with my manager. Finally, we reached an agreement that benefited everyone."
@@ -138,6 +143,7 @@ class AIEnhancementServiceTests: XCTestCase {
         }
     }
     
+    @MainActor
     func testDetectHighStakeWords() async throws {
         // Given
         let transcript = "The extraordinary sunset was absolutely magnificent and breathtaking beyond belief."
@@ -169,6 +175,7 @@ class AIEnhancementServiceTests: XCTestCase {
         }
     }
     
+    @MainActor
     func testAPIErrorHandling() async {
         // Given
         aiService.mockAPIError = .networkError
@@ -185,6 +192,7 @@ class AIEnhancementServiceTests: XCTestCase {
         }
     }
     
+    @MainActor
     func testRateLimitHandling() async {
         // Given
         aiService.mockAPIError = .rateLimitExceeded
@@ -201,6 +209,7 @@ class AIEnhancementServiceTests: XCTestCase {
         }
     }
     
+    @MainActor
     func testInvalidResponseHandling() async {
         // Given
         aiService.mockAPIResponse = "invalid json response"
@@ -217,6 +226,7 @@ class AIEnhancementServiceTests: XCTestCase {
         }
     }
     
+    @MainActor
     func testOfflineModeHandling() async {
         // Given
         aiService.isOfflineMode = true
@@ -235,6 +245,7 @@ class AIEnhancementServiceTests: XCTestCase {
         }
     }
     
+    @MainActor
     func testRequestRetryMechanism() async {
         // Given
         aiService.mockRetryCount = 2
@@ -253,6 +264,7 @@ class AIEnhancementServiceTests: XCTestCase {
         }
     }
     
+    @MainActor
     func testCachingMechanism() async throws {
         // Given
         let transcript = "test transcript for caching"

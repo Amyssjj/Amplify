@@ -11,6 +11,8 @@ struct ProcessingView: View {
     @ObservedObject var appState: AppStateManager
     @ObservedObject var aiService: AIEnhancementService
     
+    @State private var showingSignInSheet = false
+    
     @State private var animationPhase = 0
     @State private var rotationAngle: Double = 0
     @State private var processingStarted = false
@@ -68,11 +70,12 @@ struct ProcessingView: View {
         }
         .navigationBarHidden(true)
         .onAppear {
-            startProcessing()
-            
-            // Auto-transition after 3 seconds (temporary until backend connected)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-                appState.currentScreen = .results
+            checkAuthenticationAndStartProcessing()
+        }
+        .sheet(isPresented: $showingSignInSheet) {
+            GoogleSignInView(appState: appState) {
+                showingSignInSheet = false
+                startProcessing()
             }
         }
     }
@@ -223,6 +226,14 @@ struct ProcessingView: View {
     
     // MARK: - Actions
     
+    private func checkAuthenticationAndStartProcessing() {
+        if appState.isAuthenticated {
+            startProcessing()
+        } else {
+            showingSignInSheet = true
+        }
+    }
+    
     private func startProcessing() {
         guard !processingStarted else { return }
         processingStarted = true
@@ -241,53 +252,53 @@ struct ProcessingView: View {
         initializeParticles()
         
         // Outer ring animations - spring-based scaling and opacity
-        withAnimation(.spring(response: 2.0, dampingFraction: 0.6).repeatForever(autoreverses: true)) {
+        withAnimation(.spring(response: 1.0, dampingFraction: 0.6).repeatForever(autoreverses: true)) {
             outerRingScale = 1.1
             outerRingOpacity = 0.6
         }
         
         // Inner ring scaling animation
-        withAnimation(.spring(response: 3.0, dampingFraction: 0.6).repeatForever(autoreverses: true)) {
+        withAnimation(.spring(response: 1.2, dampingFraction: 0.6).repeatForever(autoreverses: true)) {
             innerRingScale = 1.1
         }
         
         // Core pulsing animation
-        withAnimation(.spring(response: 2.0, dampingFraction: 0.6).repeatForever(autoreverses: true)) {
+        withAnimation(.spring(response: 1.0, dampingFraction: 0.6).repeatForever(autoreverses: true)) {
             coreScale = 1.3
             coreShadowRadius = 8
         }
         
         // Rotation animation - linear for smooth spinning
-        withAnimation(.linear(duration: 8.0).repeatForever(autoreverses: false)) {
+        withAnimation(.linear(duration: 4.0).repeatForever(autoreverses: false)) {
             rotationAngle = 360
         }
         
         // Orbital elements scaling
         for index in 0..<3 {
             withAnimation(
-                .spring(response: 2.0, dampingFraction: 0.6)
+                .spring(response: 1.0, dampingFraction: 0.6)
                 .repeatForever(autoreverses: true)
-                .delay(Double(index) * 0.5)
+                .delay(Double(index) * 0.2)
             ) {
                 orbitalScales[index] = 1.0
             }
         }
         
         // Text animations
-        withAnimation(.spring(response: 2.0, dampingFraction: 0.8).repeatForever(autoreverses: true)) {
+        withAnimation(.spring(response: 1.0, dampingFraction: 0.8).repeatForever(autoreverses: true)) {
             subtitleOpacity = 1.0
         }
         
-        withAnimation(.spring(response: 0.6, dampingFraction: 0.8).delay(1.0)) {
+        withAnimation(.spring(response: 0.6, dampingFraction: 0.8).delay(0.3)) {
             descriptionOpacity = 1.0
         }
         
         // Progress dots animation
         for index in 0..<3 {
             withAnimation(
-                .spring(response: 1.5, dampingFraction: 0.6)
+                .spring(response: 0.8, dampingFraction: 0.6)
                 .repeatForever(autoreverses: true)
-                .delay(Double(index) * 0.3)
+                .delay(Double(index) * 0.15)
             ) {
                 dotScales[index] = 1.5
                 dotOpacities[index] = 1.0
@@ -311,8 +322,8 @@ struct ProcessingView: View {
     
     private func animateParticles() {
         for index in 0..<20 {
-            let randomDelay = Double.random(in: 0...2)
-            let randomDuration = Double.random(in: 3...5)
+            let randomDelay = Double.random(in: 0...0.8)
+            let randomDuration = Double.random(in: 1.5...2.5)
             
             withAnimation(
                 .spring(response: randomDuration, dampingFraction: 0.6)
@@ -333,52 +344,19 @@ struct ProcessingView: View {
             return
         }
         
-        // Simulate processing progress
-        await simulateProgress()
-        
-        // Enhance the story
-        let result = await aiService.enhanceStory(
-            transcript: recording.transcript,
-            duration: recording.duration
-        )
-        
-        await MainActor.run {
-            switch result {
-            case .success(let enhancement):
-                // Update recording with enhanced content
-                recording.setEnhancedTranscript(enhancement.enhancedTranscript)
-                recording.setWordHighlights(enhancement.wordHighlights)
-                
-                // Transition to results
-                Task {
-                    await appState.transitionToResults(with: enhancement.insights)
-                }
-                
-            case .failure(let error):
-                switch error {
-                case .networkError:
-                    appState.handleError(.networkError)
-                case .apiKeyMissing, .authenticationFailed:
-                    appState.handleError(.aiProcessingFailed)
-                case .rateLimitExceeded:
-                    appState.handleError(.aiProcessingFailed)
-                default:
-                    appState.handleError(.aiProcessingFailed)
-                }
+        // Start real API processing immediately - no artificial delays
+        do {
+            try await appState.enhanceRecording(recording)
+            // The AppStateManager.enhanceRecording method handles the transition to results
+        } catch {
+            await MainActor.run {
+                // Error is already handled in AppStateManager.enhanceRecording
+                // But we can handle specific UI feedback here if needed
+                print("Enhancement failed: \(error)")
             }
         }
     }
     
-    private func simulateProgress() async {
-        let totalSteps = 20
-        for step in 1...totalSteps {
-            try? await Task.sleep(nanoseconds: 200_000_000) // 0.2 seconds
-            
-            await MainActor.run {
-                appState.setProcessing(true, progress: Double(step) / Double(totalSteps))
-            }
-        }
-    }
 }
 
 #if DEBUG

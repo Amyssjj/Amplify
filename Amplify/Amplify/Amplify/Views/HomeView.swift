@@ -57,23 +57,58 @@ struct HomeView: View {
     // MARK: - Header View
     
     private var headerView: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            // Gradient text matching React version - left aligned
-            Text("Amplify")
-                .font(.system(size: 30, weight: .semibold))
-                .foregroundStyle(
-                    LinearGradient(
-                        gradient: Gradient(colors: [Color.black, Color.gray]),
-                        startPoint: .top,
-                        endPoint: .bottom
+        HStack {
+            VStack(alignment: .leading, spacing: 8) {
+                // Gradient text matching React version - left aligned
+                Text("Amplify")
+                    .font(.system(size: 30, weight: .semibold))
+                    .foregroundStyle(
+                        LinearGradient(
+                            gradient: Gradient(colors: [Color.black, Color.gray]),
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
                     )
-                )
+                
+                Text("Level up your storytelling")
+                    .font(.subheadline)
+                    .foregroundColor(Color(.systemGray))
+            }
             
-            Text("Level up your storytelling")
-                .font(.subheadline)
-                .foregroundColor(Color(.systemGray))
+            Spacer()
+            
+            // Authentication status indicator
+            if appState.isAuthenticated {
+                VStack(alignment: .trailing, spacing: 2) {
+                    HStack(spacing: 8) {
+                        Circle()
+                            .fill(Color.green)
+                            .frame(width: 8, height: 8)
+                        
+                        Text("Signed In")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    if let user = appState.currentUser {
+                        Text(user.displayName)
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+                    }
+                }
+            } else {
+                HStack(spacing: 8) {
+                    Circle()
+                        .fill(Color.orange)
+                        .frame(width: 8, height: 8)
+                    
+                    Text("Sign in for sync")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 24)
     }
     

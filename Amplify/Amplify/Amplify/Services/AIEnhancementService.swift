@@ -7,8 +7,22 @@
 
 import Foundation
 
+// MARK: - AI Enhancement Service Protocol
+
+protocol AIEnhancementServiceProtocol: ObservableObject {
+    var isProcessing: Bool { get }
+    var processingProgress: Double { get }
+    
+    func enhanceStory(transcript: String, duration: TimeInterval) async -> Result<StoryEnhancement, AIEnhancementError>
+    func generateInsights(transcript: String) async -> Result<[AIInsight], AIEnhancementError>
+    func analyzeStoryStructure(transcript: String) async -> Result<StoryStructureAnalysis, AIEnhancementError>
+    func detectHighStakeWords(transcript: String) async -> Result<HighStakeWordsDetection, AIEnhancementError>
+}
+
+// MARK: - AI Enhancement Service Implementation
+
 @MainActor
-class AIEnhancementService: ObservableObject {
+class AIEnhancementService: ObservableObject, AIEnhancementServiceProtocol {
     
     // MARK: - Published Properties
     @Published var isProcessing = false

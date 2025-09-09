@@ -10,6 +10,7 @@ import XCTest
 
 class RecordingModelTests: XCTestCase {
     
+    @MainActor
     func testRecordingInitialization() {
         // Given
         let id = UUID()
@@ -35,6 +36,7 @@ class RecordingModelTests: XCTestCase {
         XCTAssertEqual(recording.timestamp, timestamp)
     }
     
+    @MainActor
     func testRecordingWithEnhancedTranscript() {
         // Given
         let originalTranscript = "nice sunset"
@@ -55,6 +57,7 @@ class RecordingModelTests: XCTestCase {
         XCTAssertEqual(recording.originalTranscript, originalTranscript)
     }
     
+    @MainActor
     func testRecordingAddInsight() {
         // Given
         let recording = Recording(
@@ -80,6 +83,7 @@ class RecordingModelTests: XCTestCase {
         XCTAssertEqual(recording.insights.first?.title, "STAR Method")
     }
     
+    @MainActor
     func testRecordingWordHighlights() {
         // Given
         let recording = Recording(
@@ -104,6 +108,7 @@ class RecordingModelTests: XCTestCase {
         XCTAssertNil(recording.wordHighlights[1].suggested)
     }
     
+    @MainActor
     func testRecordingEquality() {
         // Given
         let id = UUID()

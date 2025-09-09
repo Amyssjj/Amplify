@@ -13,16 +13,19 @@ class SpeechRecognitionServiceTests: XCTestCase {
     
     var speechService: SpeechRecognitionService!
     
+    @MainActor
     override func setUp() {
         super.setUp()
         speechService = SpeechRecognitionService()
     }
     
+    @MainActor
     override func tearDown() {
         speechService = nil
         super.tearDown()
     }
     
+    @MainActor
     func testRequestSpeechRecognitionPermission() async {
         // When
         let permission = await speechService.requestSpeechRecognitionPermission()
@@ -36,6 +39,7 @@ class SpeechRecognitionServiceTests: XCTestCase {
         ].contains(permission))
     }
     
+    @MainActor
     func testIsAvailableForRecognition() {
         // When
         let isAvailable = speechService.isAvailableForRecognition()
@@ -45,6 +49,7 @@ class SpeechRecognitionServiceTests: XCTestCase {
         XCTAssertNotNil(isAvailable)
     }
     
+    @MainActor
     func testStartLiveRecognitionWithPermission() async throws {
         // Given
         speechService.mockPermissionStatus = .authorized
@@ -65,6 +70,7 @@ class SpeechRecognitionServiceTests: XCTestCase {
         }
     }
     
+    @MainActor
     func testStartLiveRecognitionWithoutPermission() async {
         // Given
         speechService.mockPermissionStatus = .denied
@@ -81,6 +87,7 @@ class SpeechRecognitionServiceTests: XCTestCase {
         }
     }
     
+    @MainActor
     func testStopLiveRecognition() async throws {
         // Given
         speechService.mockPermissionStatus = .authorized
@@ -94,6 +101,7 @@ class SpeechRecognitionServiceTests: XCTestCase {
         XCTAssertFalse(speechService.isRecognizing)
     }
     
+    @MainActor
     func testTranscriptCallbackExecution() async throws {
         // Given
         speechService.mockPermissionStatus = .authorized
@@ -115,6 +123,7 @@ class SpeechRecognitionServiceTests: XCTestCase {
         XCTAssertEqual(receivedTranscripts[1], "Hello world")
     }
     
+    @MainActor
     func testRecognizeAudioFile() async throws {
         // Given
         let mockAudioURL = createMockAudioFile()
@@ -134,6 +143,7 @@ class SpeechRecognitionServiceTests: XCTestCase {
         }
     }
     
+    @MainActor
     func testRecognitionConfidenceLevels() async throws {
         // Given
         speechService.mockPermissionStatus = .authorized
@@ -155,6 +165,7 @@ class SpeechRecognitionServiceTests: XCTestCase {
         XCTAssertEqual(confidenceScores[1], 0.92, accuracy: 0.01)
     }
     
+    @MainActor
     func testErrorHandlingForUnavailableService() async {
         // Given
         speechService.mockIsAvailable = false
@@ -171,6 +182,7 @@ class SpeechRecognitionServiceTests: XCTestCase {
         }
     }
     
+    @MainActor
     func testMultipleRecognitionSessionsHandling() async throws {
         // Given
         speechService.mockPermissionStatus = .authorized

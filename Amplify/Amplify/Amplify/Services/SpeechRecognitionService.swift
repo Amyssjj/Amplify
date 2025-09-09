@@ -9,8 +9,26 @@ import Foundation
 import Speech
 import AVFoundation
 
+// MARK: - Speech Recognition Service Protocol
+
+protocol SpeechRecognitionServiceProtocol: ObservableObject {
+    var isRecognizing: Bool { get }
+    var currentTranscript: String { get }
+    var recognitionConfidence: Float { get }
+    var onTranscriptUpdate: ((String) -> Void)? { get set }
+    var onConfidenceUpdate: ((Float) -> Void)? { get set }
+    
+    func requestSpeechRecognitionPermission() async -> SpeechRecognitionPermissionStatus
+    func startLiveRecognition(onTranscriptUpdate: @escaping (String) -> Void) async -> Result<Void, SpeechRecognitionError>
+    func stopLiveRecognition()
+    func recognizeAudioFile(url: URL) async -> Result<String, SpeechRecognitionError>
+    func isAvailableForRecognition() -> Bool
+}
+
+// MARK: - Speech Recognition Service Implementation
+
 @MainActor
-class SpeechRecognitionService: ObservableObject {
+class SpeechRecognitionService: ObservableObject, SpeechRecognitionServiceProtocol {
     
     // MARK: - Published Properties
     @Published var isRecognizing = false
