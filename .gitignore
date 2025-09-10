@@ -91,6 +91,7 @@ iOSInjectionProject/
 
 wip/
 logs/
-
+ActualCoverage.xcresult/
+CoverageResults.xcresult/
+TestResults.xcresult/
 .claude/
-CLAUDE.md
