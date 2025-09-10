@@ -157,12 +157,13 @@ class AuthenticationService: ObservableObject, AuthenticationServiceProtocol {
     }
 
     func refreshTokenIfNeeded() async -> Bool {
-        // Check if token needs refresh (within 5 minutes of expiry)
+        // Check if token needs refresh
         guard let expiration = tokenExpirationDate else { return false }
 
-        let refreshThreshold = Date().addingTimeInterval(5 * 60)  // 5 minutes from now
-
-        if expiration < refreshThreshold {
+        // For 30-day tokens, only refresh if actually expired (not preemptively)
+        // This prevents premature sign-outs for long-lived tokens
+        if expiration <= Date() {
+            print("🔴 Token expired - clearing authentication state")
             return await refreshToken()
         }
 
@@ -222,12 +223,11 @@ class AuthenticationService: ObservableObject, AuthenticationServiceProtocol {
     private func storeAuthenticationData(_ authResponse: AuthResponse) async throws {
         let user = User(from: authResponse.user)
 
-        // Use the actual expiration time from backend for now
-        // TODO: Implement proper refresh token flow for longer sessions
-        let expiresIn = authResponse.expiresIn ?? 3600  // Backend default (1 hour)
+        // Use the actual expiration time from backend
+        let expiresIn = authResponse.expiresIn ?? 2_592_000  // Backend default (30 days)
         let expirationDate = Date().addingTimeInterval(TimeInterval(expiresIn))
 
-        print("🔵 Token expires in \(expiresIn) seconds (~\(expiresIn/3600) hours)")
+        print("🔵 Token expires in \(expiresIn) seconds (~\(expiresIn/86400) days)")
 
         // Update local state first
         _currentToken = authResponse.accessToken
